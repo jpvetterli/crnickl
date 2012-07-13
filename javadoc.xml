@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="package" author="true" classpath="bin:/usr/share/java/mysql-connector-java.jar:/usr/local/share/java/t2.jar" destdir="../ch.agent.crnickl.javadoc" doctitle="CrNiCKL" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="/home/jp/A-WORK/workspace-indigo/ch.agent.crnickl/javadoc.html" packagenames="ch.agent.crnickl.api,ch.agent.crnickl.impl,ch.agent.crnickl.jdbc" source="1.6" sourcefiles="src/ch/agent/crnickl/T2DBException.java,src/ch/agent/crnickl/T2DBMsg.java" sourcepath="../ch.agent.crnickl.jdbc/src:src" splitindex="true" stylesheetfile="/home/jp/A-WORK/workspace-indigo/ch.agent.crnickl/javadoc.css" use="true" version="true"/>
+    </target>
+</project>

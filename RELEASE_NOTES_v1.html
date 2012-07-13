@@ -1,0 +1,70 @@
+<html>
+<style type="text/css">
+<!--/* <![CDATA[ */
+hr {border-width: 0; border-top-width: 1;}
+body {background: #d8eef7; color: black; font-family: monospace; font-size: medium;}
+xmp {background: white; border: 1px dashed; padding: 10px}
+/* ]]> */--></style>
+<title>CrNiCKL RELEASE NOTES</title>
+<body>
+
+<h1>CrNiCKL RELEASE NOTES</h1>
+
+<small>2012-07-12/jpv</small>
+
+<xmp>Copyright 2012 Hauser Olsson GmbH.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</xmp>
+<hr/>
+<!-- ************************************************************* -->
+<h2>ABOUT VERSION NUMBERS</h2>
+Version numbers are in 3 parts: a major, a medium, and a minor number.
+The major number is incremented very rarely, when the software is
+modified in such a way that clients using it need to be recoded or even 
+redesigned. The medium number is incremented when modifications break 
+backward compatibility. For all other modifications, only the minor 
+number is incremented.
+<p>
+<hr/>
+<!-- ************************************************************* -->
+<a name="v1_0_0">2012-07-12/jpv</a>
+<p>
+<h3>Version 1.0.0 &mdash; First version of CrNiCKL released</h3>
+<p>
+CrNiCKL (pronounced <q>chronicle</q>), 
+a Java database for time series, is released on the web
+at <a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>. 
+The release consists of the following archives:
+<ul>
+<li><em>crnickl-1.0.0.jar</em> (core system binaries)
+<li><em>crnickl-jdbc-1.0.0.jar</em> (core system + JDBC implementation binaries)
+<li><em>crnickl-jdbc-1.0.0.source.jar</em> (sources only)
+</ul>
+</p>
+The first archive (core system binaries) is for use
+by systems with their own implementation of the lower database layer,
+for example NoSQL implementations. The second is a ready to use
+JDBC implementation packaged together with the core system. The third 
+contains only sources.
+<p>
+An accompanying demo has been released.
+<p>
+<small>
+Note. CrNiCKL is a relaunch under a new name of ChronoDB. 
+The software is the same, except that all package names have changed.
+ChronoDB will remain accessible for a while at 
+<a href="http://agent.ch/timeseries/chronodb/">http://agent.ch/timeseries/chronodb/</a>
+but will not be updated. 
+</small>
+</html>
