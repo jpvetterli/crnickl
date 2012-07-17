@@ -10,7 +10,7 @@ xmp {background: white; border: 1px dashed; padding: 10px}
 
 <h1>CrNiCKL RELEASE NOTES</h1>
 
-<small>2012-07-12/jpv</small>
+<small>2012-07-17/jpv</small>
 
 <xmp>Copyright 2012 Hauser Olsson GmbH.
 
@@ -36,6 +36,26 @@ redesigned. The medium number is incremented when modifications break
 backward compatibility. For all other modifications, only the minor 
 number is incremented.
 <p>
+<hr/>
+<!-- ************************************************************* -->
+<a name="v1_1_0">2012-07-17/jpv</a>
+<p>
+<h3>Version 1.1.0 &mdash; All methods named delete renamed</h3>
+<p>
+All methods named "delete" have been renamed because delete is a reserved 
+word in JavaScript. Parameterless methods have been renamed "destroy".
+Methods with a parameter Foo have in most cases been renamed "deleteFoo".
+Version numbers of classes have been increased: from 1.0.0 to 1.1.0
+when defining renamed methods, and from 1.0.0 to 1.0.1 when only 
+referencing them.
+<p>
+The release consists of the following archives:
+<ul>
+<li><em>crnickl-1.1.0.jar</em> (core system binaries)
+<li><em>crnickl-jdbc-1.1.0.jar</em> (core system + JDBC implementation binaries)
+<li><em>crnickl-jdbc-1.1.0.source.jar</em> (sources only)
+</ul>
+The versions are available as tags on GitHub.
 <hr/>
 <!-- ************************************************************* -->
 <a name="v1_0_0">2012-07-12/jpv</a>

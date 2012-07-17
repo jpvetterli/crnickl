@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: UpdatableSchemaImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -42,7 +42,7 @@ import ch.agent.t2.time.TimeDomain;
  * Default implementation of {@link UpdatableSchema}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 
@@ -72,7 +72,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
 			// cache already cleared
-			getDatabase().delete(this);
+			getDatabase().deleteSchema(this);
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction()) {
@@ -107,7 +107,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	}
 
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		delete = true;
 	}
 	

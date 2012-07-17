@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: UpdatableChronicle
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -27,7 +27,7 @@ import ch.agent.crnickl.T2DBException;
  * An UpdatableChronicle is a chronicle which can be modified.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public interface UpdatableChronicle extends Chronicle, Updatable {
 
@@ -74,13 +74,13 @@ public interface UpdatableChronicle extends Chronicle, Updatable {
 	void setSchema(Schema schema) throws T2DBException;
 	
 	/**
-	 * Delete the chronicle. The operation fails if the chronicle is used as
+	 * Destroy the chronicle. The operation fails if the chronicle is used as
 	 * collection or if it has series. After applying updates {@link #isValid()}
 	 * will return false.
 	 * 
 	 * @throws T2DBException
 	 */
-	void delete() throws T2DBException;
+	void destroy() throws T2DBException;
 	
 	/**
 	 * Create an empty series with the given name. The series must be defined in

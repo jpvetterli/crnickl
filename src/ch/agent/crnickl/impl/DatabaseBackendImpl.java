@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: DatabaseBackendImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -62,7 +62,7 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * Default implementation of {@link DatabaseBackend}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  *
  */
 public abstract class DatabaseBackendImpl implements DatabaseBackend {
@@ -511,7 +511,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	}
 
 	@Override
-	public <T>boolean delete(UpdatableSeries<T> series, TimeIndex t) throws T2DBException {
+	public <T>boolean deleteValue(UpdatableSeries<T> series, TimeIndex t) throws T2DBException {
 		boolean done = ((ValueTypeImpl<T>) series.getValueType()).getAccessMethods().deleteValue(series, t, getChronicleUpdatePolicy());
 		if (done)
 			publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, series));
@@ -604,7 +604,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 			
 			for (Integer attribNr : schema.getDeletedAttributeDefinitions()) {
 				policy.willDelete(schema, schema.getAttributeDefinition(attribNr, true));
-				delete(schema, 0, attribNr);
+				deleteAttributeInSchema(schema, 0, attribNr);
 				done = true;
 			}
 			for (AttributeDefinition<?> def : schema.getEditedAttributeDefinitions()) {
@@ -619,7 +619,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 			for (Integer seriesNr : schema.getDeletedSeriesDefinitions()) {
 				SeriesDefinition ss = schema.getSeriesDefinition(seriesNr, true);
 				policy.willDelete(schema, ss);
-				delete(schema, ss.getNumber());
+				deleteSeriesInSchema(schema, ss.getNumber());
 				done = true;
 			}
 			for (SeriesDefinition ss : schema.getEditedSeriesDefinitions()) {
@@ -630,7 +630,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 				} else {
 					for (Integer attribNr : schema.getDeletedAttributeDefinitions(seriesNr)) {
 						policy.willDelete(schema, ss, ss.getAttributeDefinition(attribNr, true));
-						delete(schema, seriesNr, attribNr);
+						deleteAttributeInSchema(schema, seriesNr, attribNr);
 						done = true;
 					}
 					for (AttributeDefinition<?> def : schema.getEditedAttributeDefinitions(seriesNr)) {

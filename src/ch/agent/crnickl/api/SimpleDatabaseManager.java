@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: SimpleDatabaseManager
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -44,7 +44,7 @@ import ch.agent.crnickl.T2DBMsg.D;
  * writing tests.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class SimpleDatabaseManager {
 
@@ -385,7 +385,7 @@ public class SimpleDatabaseManager {
 			UpdatableSeries<?> us = s.edit();
 			us.setRange(null);
 			us.applyUpdates();
-			us.delete();
+			us.destroy();
 			us.applyUpdates();
 			scount++;
 		}
@@ -396,7 +396,7 @@ public class SimpleDatabaseManager {
 		}
 		if (!top) {
 			UpdatableChronicle ue = chronicle.edit();
-			ue.delete();
+			ue.destroy();
 			ue.applyUpdates();
 			ecount++;
 		}

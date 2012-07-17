@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: ChronicleUpdatePolicyImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -32,7 +32,7 @@ import ch.agent.t2.time.TimeIndex;
  * Default implementation of {@link ChronicleUpdatePolicy}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class ChronicleUpdatePolicyImpl implements ChronicleUpdatePolicy {
 	
@@ -90,25 +90,25 @@ public class ChronicleUpdatePolicyImpl implements ChronicleUpdatePolicy {
 	}
 
 	@Override
-	public boolean delete(UpdatableChronicle entity) throws T2DBException {
+	public boolean deleteChronicle(UpdatableChronicle entity) throws T2DBException {
 		if (extension != null)
-			return extension.delete(entity);
+			return extension.deleteChronicle(entity);
 		else
 			return false;
 	}
 
 	@Override
-	public boolean delete(UpdatableSeries<?> series) throws T2DBException {
+	public boolean deleteSeries(UpdatableSeries<?> series) throws T2DBException {
 		if (extension != null)
-			return extension.delete(series);
+			return extension.deleteSeries(series);
 		else
 			return false;
 	}
 
 	@Override
-	public boolean delete(UpdatableSeries<?> series, TimeIndex index) throws T2DBException {
+	public boolean deleteValue(UpdatableSeries<?> series, TimeIndex index) throws T2DBException {
 		if (extension != null)
-			return extension.delete(series, index);
+			return extension.deleteValue(series, index);
 		else
 			return false;
 	}

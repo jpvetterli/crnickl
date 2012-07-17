@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: UpdatableSeries
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -29,18 +29,18 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * An UpdatableSeries is a series which can be modified.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the class of the elements of the underlying time series
  */
 public interface UpdatableSeries<T> extends Series<T>, Updatable {
 
 	/**
-	 * Delete the series. The operation fails if the range of the series
+	 * Destroy the series. The operation fails if the range of the series
 	 * is not empty.
 	 * 
 	 * @throws T2DBException
 	 */
-	void delete() throws T2DBException;
+	void destroy() throws T2DBException;
 
 	/**
 	 * Add a value to the list of pending updates. If there is already an update

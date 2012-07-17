@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: UpdatableSeriesImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -40,7 +40,7 @@ import ch.agent.t2.timeseries.TimeSeriesFactory;
  * Default implementation of {@link UpdatableSeries}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the class of the elements of the underlying time series
  */
 public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSeries<T> {
@@ -273,7 +273,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 	}
 	
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		if (getSurrogate().inConstruction())
 			throw T2DBMsg.exception(D.D50111, getName(true));
 		if (updates != null || deletes != null || range != null)
@@ -284,7 +284,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
-			getDatabase().delete(this);
+			getDatabase().deleteSeries(this);
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction())
@@ -293,7 +293,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 				getDatabase().update(this, updates);
 			if (deletes != null) {
 				for (TimeIndex t : deletes) {
-					getDatabase().delete(this, t);
+					getDatabase().deleteValue(this, t);
 				}
 			}
 			if (range != null)

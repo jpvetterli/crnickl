@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: NameSpace
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -38,7 +38,7 @@ import ch.agent.crnickl.api.UpdatableSeries;
  * The top-level chronicle exists only virtually, and is never stored.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class NameSpace extends UpdatableChronicleImpl {
 
@@ -192,7 +192,7 @@ public class NameSpace extends UpdatableChronicleImpl {
 	 * Always throws an exception.
 	 */
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		throw T2DBMsg.exception(D.D40101);
 	}
 

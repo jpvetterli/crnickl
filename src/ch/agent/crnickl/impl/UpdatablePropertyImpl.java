@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: UpdatablePropertyImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -30,7 +30,7 @@ import ch.agent.crnickl.api.ValueType;
  * Default implementation of {@link UpdatableProperty}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the underlying data type of attributes having this property
  */
 public class UpdatablePropertyImpl<T> extends PropertyImpl<T> implements UpdatableProperty<T> {
@@ -65,7 +65,7 @@ public class UpdatablePropertyImpl<T> extends PropertyImpl<T> implements Updatab
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
 			// cache already cleared
-			getDatabase().delete(this);
+			getDatabase().deleteProperty(this);
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction())
@@ -94,7 +94,7 @@ public class UpdatablePropertyImpl<T> extends PropertyImpl<T> implements Updatab
 	}
 
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		if (name != null)
 			throw T2DBMsg.exception(D.D20107, getName());
 		delete = true;

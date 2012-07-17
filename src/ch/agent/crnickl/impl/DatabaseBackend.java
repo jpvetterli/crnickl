@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: DatabaseBackend
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -52,7 +52,7 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * deleted may not have important dependencies.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public interface DatabaseBackend extends Database, PermissionChecker {
 	
@@ -249,7 +249,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param property a property
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableProperty<?> property) throws T2DBException;
+	void deleteProperty(UpdatableProperty<?> property) throws T2DBException;
 	
 	/**
 	 * Modify a property in the database.
@@ -274,7 +274,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param valueType a value type
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableValueType<?> valueType) throws T2DBException;
+	void deleteValueType(UpdatableValueType<?> valueType) throws T2DBException;
 	
 	/**
 	 * Update the name of the value type. 
@@ -314,7 +314,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param def an attribute definition
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableChronicle chronicle, AttributeDefinition<?> def) throws T2DBException;
+	void deleteAttributeValue(UpdatableChronicle chronicle, AttributeDefinition<?> def) throws T2DBException;
 
 	/**
 	 * Set the value and description of an attribute of a chronicle.
@@ -343,7 +343,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param chronicle
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableChronicle chronicle) throws T2DBException;
+	void deleteChronicle(UpdatableChronicle chronicle) throws T2DBException;
 
 	/**
 	 * Get a chronicle from the database.
@@ -504,7 +504,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @return true if something done
 	 * @throws T2DBException
 	 */
-	<T>boolean delete(UpdatableSeries<T> series, TimeIndex t) throws T2DBException;
+	<T>boolean deleteValue(UpdatableSeries<T> series, TimeIndex t) throws T2DBException;
 	
 	/**
 	 * Delete a series from the database.
@@ -512,7 +512,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param series a series
 	 * @throws T2DBException
 	 */
-	<T>void delete(UpdatableSeries<T> series) throws T2DBException;
+	<T>void deleteSeries(UpdatableSeries<T> series) throws T2DBException;
 	
 	/**
 	 * Create a schema in the database.
@@ -537,7 +537,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @param schema a schema
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableSchema schema) throws T2DBException;
+	void deleteSchema(UpdatableSchema schema) throws T2DBException;
 	
 	/**
 	 * Delete an attribute in a schema from the database.
@@ -550,7 +550,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 *            an attribute number
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException;
+	void deleteAttributeInSchema(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException;
 	
 	/**
 	 * Delete a series in a schema from the database.
@@ -561,7 +561,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 *            a series number
 	 * @throws T2DBException
 	 */
-	void delete(UpdatableSchema schema, int seriesNr) throws T2DBException;
+	void deleteSeriesInSchema(UpdatableSchema schema, int seriesNr) throws T2DBException;
 	
 	/**
 	 * Get a schema from the database.

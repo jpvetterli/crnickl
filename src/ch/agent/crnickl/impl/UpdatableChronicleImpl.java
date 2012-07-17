@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: UpdatableChronicleImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -44,7 +44,7 @@ import ch.agent.crnickl.api.ValueType;
  * Default implementation of {@link UpdatableChronicle}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableChronicle {
 
@@ -263,7 +263,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 	}
 
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		if (seriesUpdate.size() != 0 || name != null || description != null || collection != null
 				|| schema != null || attributesUpdate != null)
 			throw T2DBMsg.exception(D.D40107, getName(true));
@@ -275,7 +275,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 		boolean done = false;
 		getDatabase().getCache().clear(this); // a bit of overkill
 		if (delete) {
-			getDatabase().delete(this);
+			getDatabase().deleteChronicle(this);
 			delete = false;
 			done = true;
 		} else {
@@ -336,7 +336,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 				throw T2DBMsg.exception(D.D30114, property.getName());
 			String value = type.toString(attribute.get());
 			if (value == null || value.length() == 0) {
-				getDatabase().delete(this, def);
+				getDatabase().deleteAttributeValue(this, def);
 			} else {
 				String description = attribute.getDescription(false);
 				if (description == null)

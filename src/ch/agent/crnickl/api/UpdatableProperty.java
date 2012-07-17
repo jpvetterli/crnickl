@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: UpdatableProperty
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -25,7 +25,7 @@ import ch.agent.crnickl.T2DBException;
  * An UpdatableProperty is a property which can be modified.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the underlying data type of attributes having this property
 
  */
@@ -39,10 +39,10 @@ public interface UpdatableProperty<T> extends Property<T>, Updatable {
 	void setName(String name) throws T2DBException;
 	
 	/**
-	 * Delete the property. The operation fails if the property is used in
+	 * Destroy the property. The operation fails if the property is used in
 	 * a schema.
 	 * 
 	 * @throws T2DBException
 	 */
-	void delete() throws T2DBException;
+	void destroy() throws T2DBException;
 }

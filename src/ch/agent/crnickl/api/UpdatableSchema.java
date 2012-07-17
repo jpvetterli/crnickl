@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: UpdatableSchema
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -43,16 +43,16 @@ import ch.agent.t2.time.TimeDomain;
  * of the existence of schemas a and b.  
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public interface UpdatableSchema extends Schema, Updatable {
 
 	/**
-	 * Delete the schema. The operation fails if the schema is used.
+	 * Destroy the schema. The operation fails if the schema is used.
 	 * 
 	 * @throws T2DBException
 	 */
-	void delete() throws T2DBException;
+	void destroy() throws T2DBException;
 	
 	/**
 	 * Set the name of the schema.

@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.api
  * Type: UpdatableValueType
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -25,7 +25,7 @@ import ch.agent.crnickl.T2DBException;
  * An UpdatableValueType is a value type which can be modified.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the underlying data type of the values
  */
 public interface UpdatableValueType<T> extends ValueType<T>, Updatable {
@@ -71,10 +71,10 @@ public interface UpdatableValueType<T> extends ValueType<T>, Updatable {
 	void deleteValue(T value) throws T2DBException;
 	
 	/**
-	 * Delete the value type. The operation fails if the value type is in use.
+	 * Destroy the value type. The operation fails if the value type is in use.
 	 * 
 	 * @throws T2DBException
 	 */
-	void delete() throws T2DBException;
+	void destroy() throws T2DBException;
 	
 }

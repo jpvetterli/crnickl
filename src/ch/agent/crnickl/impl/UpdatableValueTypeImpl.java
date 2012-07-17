@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.impl
  * Type: UpdatableValueTypeImpl
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -34,7 +34,7 @@ import ch.agent.crnickl.api.UpdatableValueType;
  * Default implementation of {@link UpdatableValueType}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the underlying data type of the values
  */
 public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements UpdatableValueType<T> {
@@ -88,7 +88,7 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
-			getDatabase().delete(this);
+			getDatabase().deleteValueType(this);
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction()) {
@@ -182,7 +182,7 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 	}
 
 	@Override
-	public void delete() throws T2DBException {
+	public void destroy() throws T2DBException {
 		if (name != null || added.size() > 0 || edited.size() > 0 || deleted.size() > 0)
 			throw T2DBMsg.exception(D.D10119, getName());
 		delete = true;
