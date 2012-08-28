@@ -1,18 +1,6 @@
-<html>
-<style type="text/css">
-<!--/* <![CDATA[ */
-hr {border-width: 0; border-top-width: 1;}
-body {background: #d8eef7; color: black; font-family: monospace; font-size: medium;}
-xmp {background: white; border: 1px dashed; padding: 10px}
-/* ]]> */--></style>
-<title>CrNiCKL RELEASE NOTES</title>
-<body>
-
 <h1>CrNiCKL RELEASE NOTES</h1>
 
-<small>2012-07-17/jpv</small>
-
-<xmp>Copyright 2012 Hauser Olsson GmbH.
+<pre><code>Copyright 2012 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,66 +13,114 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-</xmp>
-<hr/>
-<!-- ************************************************************* -->
+</code></pre>
+
+<hr />
+
 <h2>ABOUT VERSION NUMBERS</h2>
-Version numbers are in 3 parts: a major, a medium, and a minor number.
+
+<p>Version numbers are in 3 parts: a major, a medium, and a minor number.
 The major number is incremented very rarely, when the software is
 modified in such a way that clients using it need to be recoded or even 
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
-number is incremented.
-<p>
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_0">2012-07-17/jpv</a>
-<p>
-<h3>Version 1.1.0 &mdash; All methods named delete renamed</h3>
-<p>
-All methods named "delete" have been renamed because delete is a reserved 
+number is incremented.</p>
+
+<hr />
+
+<p><a name="v1_1_5">2012-08-28/jpv</a></p>
+
+<h2>Version 1.1.1 &mdash; Project migrated to Maven</h2>
+
+<p>This is a maintenance release which behaves exactly like the previous 
+version and is plug-compatible for applications. The organization of source 
+files has been modified to agree with the standard recommended by 
+<a href="http://maven.apache.org">Apache Maven</a>.</p>
+
+<p>The release consists of two JARs:</p>
+
+<ul>
+<li><code>crnickl-1.1.1.jar</code> (binaries)</li>
+<li><code>crnickl-1.1.1-sources.jar</code> (sources only)</li>
+</ul>
+
+<p>It was necessary to increment version numbers because the JAR checksums
+are different, due to small differences related to builders. Another
+change is in the name of the source JAR. The suffix has been modified and
+is now <code>-sources.jar</code>. Previously it was <code>.source.jar</code>.</p>
+
+<p>There is also a new version of the <strong>JDBC Implementation of CrNiCKL</strong>:</p>
+
+<ul>
+<li><code>crnickl-jdbc-1.1.1.jar</code> (binaries)</li>
+<li><code>crnickl-jdbc-1.1.1-sources.jar</code> (sources only)</li>
+</ul>
+
+<p>Likewise, there is a new version of the <strong>CrNiCKL Demos</strong>:</p>
+
+<ul>
+<li><code>crnickl-demo-1.1.2.jar</code> (binaries)</li>
+<li><code>crnickl-demo-1.1.2-sources.jar</code> (sources only)</li>
+</ul>
+
+<hr />
+
+<p><a name="v1_1_0">2012-07-17/jpv</a></p>
+
+<h2>Version 1.1.0 &mdash; All methods named delete renamed</h2>
+
+<p>All methods named "delete" have been renamed because delete is a reserved 
 word in JavaScript. Parameterless methods have been renamed "destroy".
 Methods with a parameter Foo have in most cases been renamed "deleteFoo".
 Version numbers of classes have been increased: from 1.0.0 to 1.1.0
 when defining renamed methods, and from 1.0.0 to 1.0.1 when only 
-referencing them.
-<p>
-The release consists of the following archives:
+referencing them.</p>
+
+<p>The release consists of the following archives:</p>
+
 <ul>
-<li><em>crnickl-1.1.0.jar</em> (core system binaries)
-<li><em>crnickl-jdbc-1.1.0.jar</em> (core system + JDBC implementation binaries)
-<li><em>crnickl-jdbc-1.1.0.source.jar</em> (sources only)
+<li><code>crnickl-1.1.0.jar</code> (core system binaries)</li>
+<li><code>crnickl-jdbc-1.1.0.jar</code> (core system + JDBC implementation binaries)</li>
+<li><code>crnickl-jdbc-1.1.0.source.jar</code> (sources only)</li>
 </ul>
-The versions are available as tags on GitHub.
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_0_0">2012-07-12/jpv</a>
-<p>
-<h3>Version 1.0.0 &mdash; First version of CrNiCKL released</h3>
-<p>
-CrNiCKL (pronounced <q>chronicle</q>), 
+
+<p>The versions are available as tags on GitHub.</p>
+
+<hr />
+
+<p><a name="v1_0_0">2012-07-12/jpv</a></p>
+
+<h2>Version 1.0.0 &mdash; First version of CrNiCKL released</h2>
+
+<p>CrNiCKL (pronounced <q>chronicle</q>), 
 a Java database for time series, is released on the web
 at <a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>. 
-The release consists of the following archives:
+The release consists of the following archives:</p>
+
 <ul>
-<li><em>crnickl-1.0.0.jar</em> (core system binaries)
-<li><em>crnickl-jdbc-1.0.0.jar</em> (core system + JDBC implementation binaries)
-<li><em>crnickl-jdbc-1.0.0.source.jar</em> (sources only)
+<li><code>crnickl-1.0.0.jar</code> (core system binaries)</li>
+<li><code>crnickl-jdbc-1.0.0.jar</code> (core system + JDBC implementation binaries)</li>
+<li><code>crnickl-jdbc-1.0.0.source.jar</code> (sources only)</li>
 </ul>
-</p>
-The first archive (core system binaries) is for use
+
+<p>The first archive (core system binaries) is for use
 by systems with their own implementation of the lower database layer,
 for example NoSQL implementations. The second is a ready to use
 JDBC implementation packaged together with the core system. The third 
-contains only sources.
-<p>
-An accompanying demo has been released.
-<p>
-<small>
+contains only sources.</p>
+
+<p>An accompanying demo has been released.</p>
+
+<hr />
+
+<p><small>
 Note. CrNiCKL is a relaunch under a new name of ChronoDB. 
 The software is the same, except that all package names have changed.
 ChronoDB will remain accessible for a while at 
 <a href="http://agent.ch/timeseries/chronodb/">http://agent.ch/timeseries/chronodb/</a>
 but will not be updated. 
-</small>
-</html>
+</small></p>
+
+<p><small>Updated: 2012-08-28/jpv</small></p>
+
+<p><link rel="stylesheet" type="text/css" href="README.css"/></p>
