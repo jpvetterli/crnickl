@@ -29,6 +29,37 @@ number is incremented.
 
 *************************************************************
 
+<a name="v1_1_2">2012-09-07/jpv</a>
+
+Version 1.1.2 &mdash; Software deployed to the central maven repository
+-----------------------------------------------------------------------
+
+This is a maintenance release which behaves exactly like the previous 
+version and is plug-compatible for applications. The POM file has been
+modified to agree with 
+[requirements](https://docs.sonatype.org/display/Repository/Central+Sync+Requirements)
+for deployment to the central maven repository. 
+
+The release consists of three JARs:
+
+- `crnickl-1.1.2.jar` (binaries)
+- `crnickl-1.1.2-javadoc.jar`
+- `crnickl-1.1.2-sources.jar`
+
+There is also a new version of the __JDBC Implementation of CrNiCKL__:
+
+- `crnickl-jdbc-1.1.2.jar` (binaries)
+- `crnickl-jdbc-1.1.2-javadoc.jar`
+- `crnickl-jdbc-1.1.2-sources.jar`
+
+Likewise, there is a new version of the __CrNiCKL Demos__:
+
+- `crnickl-demo-1.1.3.jar` (binaries)
+- `crnickl-demo-1.1.3-javadoc.jar`
+- `crnickl-demo-1.1.3-sources.jar`
+
+*************************************************************
+
 <a name="v1_1_1">2012-08-28/jpv</a>
 
 Version 1.1.1 &mdash; Project migrated to Maven
