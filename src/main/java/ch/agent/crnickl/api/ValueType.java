@@ -89,10 +89,11 @@ public interface ValueType<T> extends DBObject {
 	boolean isRestricted();
 	
 	/**
-	 * Return true is the value type is provided by CrNiCKL.
+	 * This method is obsolete and always return false.
 	 * 
-	 * @return true is the value type is provided by CrNiCKL
+	 * @return false
 	 */
+	@Deprecated
 	boolean isBuiltIn();
 	
 	/**

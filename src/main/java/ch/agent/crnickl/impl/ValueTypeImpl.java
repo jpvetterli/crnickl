@@ -498,8 +498,9 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 	}
 
 	@Override
+	@Deprecated
 	public boolean isBuiltIn() {
-		return ((SurrogateImpl) getSurrogate()).getId() <= DatabaseBackend.MAX_MAGIC_NR;
+		return false;
 	}
 
 	@Override
