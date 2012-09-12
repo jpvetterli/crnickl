@@ -39,6 +39,7 @@ import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
+import ch.agent.crnickl.api.ValueType;
 
 /**
  * Default implementation of {@link DatabaseCache}. There are actually three
@@ -404,6 +405,11 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	public void clear(Property<?> property) {
 		if (propCache.get(((SurrogateImpl) property.getSurrogate()).getId()) != null)
 			clear(); // keep it simple, property updates are very rare
+	}
+
+	@Override
+	public void clear(ValueType<?> valueType) {
+		clear(); // keep it simple, assume meta data updates are rare
 	}
 
 //	/**

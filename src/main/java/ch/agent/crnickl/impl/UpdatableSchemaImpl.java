@@ -71,7 +71,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
-			// cache already cleared
+			getDatabase().getCache().clear(this);
 			getDatabase().deleteSchema(this);
 			delete = false;
 		} else {

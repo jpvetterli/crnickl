@@ -88,6 +88,7 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
+			getDatabase().getCache().clear(this);
 			getDatabase().deleteValueType(this);
 			delete = false;
 		} else {
@@ -95,10 +96,15 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 				getDatabase().create(this);
 				name = null;
 			}
-			if (name != null)
+			if (name != null) {
+				getDatabase().getCache().clear(this);
 				getDatabase().update(this);
-			if (added.size()> 0 || edited.size() > 0 || deleted.size() > 0)
+			}
+			if (added.size()> 0 || edited.size() > 0 || deleted.size() > 0) {
+				if (name == null)
+					getDatabase().getCache().clear(this);
 				getDatabase().update(this, added, edited, deleted);
+			}
 			update();
 		}
 	}

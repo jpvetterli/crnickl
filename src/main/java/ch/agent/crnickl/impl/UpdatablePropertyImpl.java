@@ -64,7 +64,7 @@ public class UpdatablePropertyImpl<T> extends PropertyImpl<T> implements Updatab
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
-			// cache already cleared
+			getDatabase().getCache().clear(this);
 			getDatabase().deleteProperty(this);
 			delete = false;
 		} else {

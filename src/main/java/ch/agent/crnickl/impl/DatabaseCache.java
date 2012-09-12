@@ -24,6 +24,7 @@ import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.Surrogate;
+import ch.agent.crnickl.api.ValueType;
 
 /**
  * A DatabaseCache is used to provide fast access to frequently used chronicles
@@ -102,6 +103,15 @@ public interface DatabaseCache {
 	 *            a property
 	 */
 	void clear(Property<?> property);
+	
+	/**
+	 * Remove a value type from the cache if present. This method must be called
+	 * before modifying or deleting a value type.
+	 * 
+	 * @param valueType
+	 *            a valueType
+	 */
+	void clear(ValueType<?> valueType);
 	
 	/**
 	 * Clear the cache.
