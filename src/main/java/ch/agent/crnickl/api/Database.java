@@ -249,6 +249,14 @@ public interface Database {
 	Property<?> getProperty(String name, boolean mustExist) throws T2DBException;
 	
 	/**
+	 * Return the built-in property for symbols.
+	 * 
+	 * @return the symbol property
+	 * @throws T2DBException
+	 */
+	Property<?> getSymbolBuiltInProperty() throws T2DBException;
+	
+	/**
 	 * Return the built-in property for time domains.
 	 * 
 	 * @return the time domain property

@@ -61,6 +61,17 @@ public interface DatabaseCache {
 	ChronicleImpl lookUpChronicle(String name);
 	
 	/**
+	 * Look up a property in the cache by name. If not in the cache
+	 * get it from the database. Throw an exception if not found.
+	 * This method is meant for accessing "built-in" properties
+	 * 
+	 * @param name a string
+	 * @return a property
+	 * @throws T2DBException
+	 */
+	Property<?> lookUpProperty(String name) throws T2DBException;
+	
+	/**
 	 * Store a chronicle in the cache and return a copy. 
 	 * Return null if the chronicle was not kept in the cache for some reason.
 	 * 

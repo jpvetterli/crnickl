@@ -34,6 +34,7 @@ import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.MessageListener;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
@@ -89,9 +90,9 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	
 	private class PropertyRefCounter extends RefCounter {
 		
-		private PropertyImpl<?> property;
+		private Property<?> property;
 		
-		public PropertyRefCounter(PropertyImpl<?> property) {
+		public PropertyRefCounter(Property<?> property) {
 			super();
 			this.property = property;
 		}
@@ -139,6 +140,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		}
 	}
 	
+	private Database db;
 	private int capacity;
 	private int removedTotal;
 	private int removedTotalThreshold = 1;
@@ -146,29 +148,34 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	private Map<String, ChronicleImpl> byNameCache;
 	private Map<Object, SchemaRefCounter> schemaCache;
 	private Map<Object, PropertyRefCounter> propCache;
+	private Map<String, Property<?>> propByNameCache;
 	private MessageListener messageListener;
 	
 	/**
 	 * Construct a {@link DatabaseCache}.
 	 * 
+	 * @param db the database being cached
 	 * @param capacity a positive number
 	 * @param loadFactor a number between 0 and 1
 	 */
-	public DatabaseCacheImpl(int capacity, float loadFactor) {
+	public DatabaseCacheImpl(Database db, int capacity, float loadFactor) {
+		this.db = db;
 		this.capacity = capacity;
 		byIdCache = Collections.synchronizedMap(new ChronicleCache(capacity, loadFactor, this));
 		byNameCache = Collections.synchronizedMap(new HashMap<String, ChronicleImpl>());
 		schemaCache = Collections.synchronizedMap(new HashMap<Object, SchemaRefCounter>());
 		propCache = Collections.synchronizedMap(new HashMap<Object, PropertyRefCounter>());
+		propByNameCache = Collections.synchronizedMap(new HashMap<String, Property<?>>());
 	}
 
 	/**
 	 * Construct a {@link DatabaseCache} with a 0.75 load factor.
 	 * 
+	 * @param db the database being cached
 	 * @param capacity a positive number
 	 */
-	public DatabaseCacheImpl(int capacity) {
-		this(capacity, 0.75f);
+	public DatabaseCacheImpl(Database db, int capacity) {
+		this(db, capacity, 0.75f);
 	}
 	
 	/**
@@ -206,6 +213,16 @@ public class DatabaseCacheImpl implements DatabaseCache {
 //			message(Level.INFO, String.format("*** CACHE HIT: %s %s %d", ent.toString(), ent.getKey().toString(), size()));
 //		return ent;
 		return byNameCache.get(name);
+	}
+	
+	@Override
+	public Property<?> lookUpProperty(String name) throws T2DBException {
+		Property<?> p = propByNameCache.get(name);
+		if (p == null) {
+			p = db.getProperty(name, true);
+			ref(p);
+		}
+		return p;
 	}
 
 	@Override
@@ -308,7 +325,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		for (AttributeDefinition<?> def : defs) {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			AttributeDefinition<?> defCopy = 
-				new AttributeDefinitionImpl(def.getNumber(), ref((PropertyImpl<?>) def.getProperty()), def.getValue());
+				new AttributeDefinitionImpl(def.getNumber(), ref(def.getProperty()), def.getValue());
 			defCopies.add(defCopy);
 		}
 		return defCopies;
@@ -330,11 +347,11 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		if (ref.decr() < 1) {
 			schemaCache.remove(id);
 			for (AttributeDefinition<?> def : schema.getAttributeDefinitions()) {
-				unRef((PropertyImpl<?>) def.getProperty());
+				unRef(def.getProperty());
 			}
 			for (SeriesDefinition ss : schema.getSeriesDefinitions()) {
 				for (AttributeDefinition<?> def : ss.getAttributeDefinitions()) {
-					unRef((PropertyImpl<?>) def.getProperty());
+					unRef(def.getProperty());
 				}
 			}
 		}
@@ -346,13 +363,14 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	 * @param property may not be null
 	 * @return
 	 */
-	private PropertyImpl<?> ref(PropertyImpl<?> property) {
+	private Property<?> ref(Property<?> property) {
 		Integer id = ((SurrogateImpl) property.getSurrogate()).getId();
 		PropertyRefCounter ref = propCache.get(id);
-		PropertyImpl<?> p = null;
+		Property<?> p = null;
 		if (ref == null) {
 			p = property;
 			propCache.put(id, new PropertyRefCounter(p));
+			propByNameCache.put(property.getName(), p);
 		} else {
 			p = ref.property;
 			ref.incr();
@@ -360,11 +378,13 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		return p;
 	}
 	
-	private void unRef(PropertyImpl<?> property) {
+	private void unRef(Property<?> property) {
 		Integer id = ((SurrogateImpl) property.getSurrogate()).getId();
 		PropertyRefCounter ref = propCache.get(id);
-		if (ref.decr() < 1)
+		if (ref.decr() < 1) {
 			propCache.remove(id);
+			propByNameCache.remove(property.getName());
+		}
 	}
 	
 	/****** Udpate management ******/
@@ -378,6 +398,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		byIdCache.clear();
 		schemaCache.clear();
 		propCache.clear();
+		propByNameCache.clear();
 	}
 	
 	@Override

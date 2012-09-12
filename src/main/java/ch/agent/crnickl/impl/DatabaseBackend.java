@@ -56,6 +56,11 @@ import ch.agent.t2.timeseries.TimeAddressable;
  */
 public interface DatabaseBackend extends Database, PermissionChecker {
 	
+	public static final String BUILTIN_PROP_SYMBOL = "Symbol";
+	public static final String BUILTIN_PROP_TIME_DOMAIN = "Calendar";
+	public static final String BUILTIN_PROP_TYPE = "Type";
+	public static final String BUILTIN_PROP_SPARSITY = "Sparsity";
+	
 	/**
 	 * The number for the NAME built-in value type and corresponding property and attribute.
 	 */

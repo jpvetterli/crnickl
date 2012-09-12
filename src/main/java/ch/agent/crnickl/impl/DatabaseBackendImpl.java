@@ -244,9 +244,9 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		}
 		if (cacheSize > 0) {
 			if (cacheLoadFactor > 0f)
-				cache = new DatabaseCacheImpl(cacheSize, cacheLoadFactor);
+				cache = new DatabaseCacheImpl(this, cacheSize, cacheLoadFactor);
 			else
-				cache = new DatabaseCacheImpl(cacheSize);
+				cache = new DatabaseCacheImpl(this, cacheSize);
 		}
 		
 		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Boolean_STRICT_NAME_SPACE, false);
@@ -676,21 +676,23 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	}
 	
 	@Override
+	public Property<?> getSymbolBuiltInProperty() throws T2DBException {
+		return getCache().lookUpProperty(DatabaseBackend.BUILTIN_PROP_SYMBOL);
+	}
+	
+	@Override
 	public Property<?> getTimeDomainBuiltInProperty() throws T2DBException {
-		Surrogate surrogate = new SurrogateImpl(this, DBObjectType.PROPERTY, DatabaseBackend.MAGIC_TIMEDOMAIN_NR);
-		return getProperty(surrogate);
+		return getCache().lookUpProperty(DatabaseBackend.BUILTIN_PROP_TIME_DOMAIN);
 	}
 
 	@Override
 	public Property<?> getTypeBuiltInProperty() throws T2DBException {
-		Surrogate surrogate = new SurrogateImpl(this, DBObjectType.PROPERTY, DatabaseBackend.MAGIC_TYPE_NR);
-		return getProperty(surrogate);
+		return getCache().lookUpProperty(DatabaseBackend.BUILTIN_PROP_TYPE);
 	}
 
 	@Override
 	public Property<?> getSparsityBuiltInProperty() throws T2DBException {
-		Surrogate surrogate = new SurrogateImpl(this, DBObjectType.PROPERTY, DatabaseBackend.MAGIC_SPARSITY_NR);
-		return getProperty(surrogate);
+		return getCache().lookUpProperty(DatabaseBackend.BUILTIN_PROP_SPARSITY);
 	}
 	
 	@Override
