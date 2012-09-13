@@ -22,7 +22,9 @@ package ch.agent.crnickl.impl;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.DBObject;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
+import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
 
 /**
@@ -48,8 +50,23 @@ public class SurrogateImpl implements Surrogate {
 		}
 
 		@Override
+		public DBObjectId getId() {
+			return surrogate.getId();
+		}
+
+		@Override
+		public Database getDatabase() {
+			return surrogate.getDatabase();
+		}
+
+		@Override
 		public Surrogate getSurrogate() {
 			return surrogate;
+		}
+
+		@Override
+		public boolean inConstruction() {
+			return surrogate.inConstruction();
 		}
 
 		@Override
@@ -72,16 +89,16 @@ public class SurrogateImpl implements Surrogate {
 	
 	private DatabaseBackend db;
 	private DBObjectType dot;
-	private int id;
+	private DBObjectId id;
 	
 	/**
 	 * Construct a {@link Surrogate}.
 	 * 
 	 * @param db a database backend
 	 * @param dot a database object type
-	 * @param id a number
+	 * @param id an id
 	 */
-	public SurrogateImpl(DatabaseBackend db, DBObjectType dot, int id) {
+	public SurrogateImpl(DatabaseBackend db, DBObjectType dot, DBObjectId id) {
 		super();
 		this.db = db;
 		this.dot = dot;
@@ -92,7 +109,7 @@ public class SurrogateImpl implements Surrogate {
 	public void upgrade(Surrogate surrogate) {
 		if (!inConstruction())
 			throw new IllegalStateException();
-		if (((SurrogateImpl) surrogate).dot != dot || ((SurrogateImpl) surrogate).id <= 0)
+		if (((SurrogateImpl) surrogate).dot != dot || ((SurrogateImpl) surrogate).id == null)
 			throw new RuntimeException("bug: " + surrogate.toString());
 		id = ((SurrogateImpl) surrogate).id;
 	}
@@ -106,19 +123,15 @@ public class SurrogateImpl implements Surrogate {
 	public DBObjectType getDBObjectType() {
 		return dot;
 	}
-	/**
-	 * Return the object id.
-	 * The object id is 0 for an object in construction.
-	 * 
-	 * @return an integer
-	 */
-	public Integer getId() {
+	
+	@Override
+	public DBObjectId getId() {
 		return id;
 	}
 	
 	@Override
 	public boolean inConstruction() {
-		return id <= 0;
+		return id == null;
 	}
 	
 	@Override
@@ -154,7 +167,7 @@ public class SurrogateImpl implements Surrogate {
 			int result = 1;
 			result = prime * result + ((db == null) ? 0 : db.hashCode());
 			result = prime * result + ((dot == null) ? 0 : dot.hashCode());
-			result = prime * result + id;
+			result = prime * result + ((id == null) ? 0 : id.hashCode());
 			hashCode = result;
 		}
 		return hashCode;
@@ -176,13 +189,21 @@ public class SurrogateImpl implements Surrogate {
 			return false;
 		if (dot != other.dot)
 			return false;
-		return  id > 0 && id == other.id;
-	}
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+
+	}	
+	
 	@Override
 	public String toString() {
 		if (string == null) {
 			Chronicle top = db.getTopChronicle();
-			string = String.format("%s-%d-%d", top == null ? null : top.toString() , dot.ordinal(), id);
+			string = String.format("%s-%d-%s", top == null ? null : top.toString() , dot.ordinal(), 
+					(id == null ? "null" : id.toString()));
 		}
 		return string;
 	}

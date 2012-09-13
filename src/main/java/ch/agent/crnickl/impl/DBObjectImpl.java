@@ -20,6 +20,7 @@
 package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.api.DBObject;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.Surrogate;
 
 /**
@@ -44,17 +45,23 @@ public class DBObjectImpl implements DBObject {
 	}
 
 	@Override
+	public DBObjectId getId() {
+		return surr.getId();
+	}
+
+	@Override
 	public Surrogate getSurrogate() {
 		return surr;
 	}
 	
-	/**
-	 * Return the database.
-	 * 
-	 * @return the database
-	 */
+	@Override
 	public DatabaseBackend getDatabase() {
 		return surr.getDatabase();
+	}
+
+	@Override
+	public boolean inConstruction() {
+		return surr.inConstruction();
 	}
 
 	@Override

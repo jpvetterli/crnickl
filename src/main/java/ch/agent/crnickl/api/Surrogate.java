@@ -66,6 +66,14 @@ public interface Surrogate {
 	DBObject getObject();
 	
 	/**
+	 * Return the id of this database object.
+	 * The id can be null, meaning the object is <em>in construction</em>.
+	 * 
+	 * @return a {@link DBObjectId} or null
+	 */
+	DBObjectId getId();
+	
+	/**
 	 * Return the database of the database object.
 	 * 
 	 * @return a database

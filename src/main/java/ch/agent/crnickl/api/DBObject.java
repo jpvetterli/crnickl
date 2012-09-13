@@ -37,6 +37,29 @@ public interface DBObject {
 	Surrogate getSurrogate();
 	
 	/**
+	 * Return the database of the object.
+	 * 
+	 * @return a database
+	 */
+	Database getDatabase();
+
+	/**
+	 * Return the id of this database object.
+	 * The id can be null, meaning the object is <em>in construction</em>.
+	 * 
+	 * @return a {@link DBObjectId} or null
+	 */
+	DBObjectId getId();
+	
+	/**
+	 * Test whether the data object is in the database or is a new object being
+	 * constructed.
+	 * 
+	 * @return true if the database object is in construction
+	 */
+	boolean inConstruction();
+	
+	/**
 	 * Return true if the database object was not deleted.
 	 * 
 	 * @return true if the database object was not deleted

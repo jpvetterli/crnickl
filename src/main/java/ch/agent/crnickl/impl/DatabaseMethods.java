@@ -20,6 +20,7 @@
 package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.api.DBObject;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
@@ -34,33 +35,6 @@ import ch.agent.crnickl.api.Surrogate;
 public interface DatabaseMethods {
 	
 	/**
-	 * Return the internal ID of a database object.
-	 * The internal ID is not exposed to clients.
-	 * 
-	 * @param dBObject a database object
-	 * @return a positive integer
-	 */
-	int getId(DBObject dBObject);
-
-	/**
-	 * Return the internal ID of a database object or 0 if the object is null.
-	 * The internal ID is not exposed to clients.
-	 * 
-	 * @param dBObject a database object or null
-	 * @return a non negative integer
-	 */
-	int getIdOrZero(DBObject dBObject);
-
-	/**
-	 * Extract the internal ID of a database object from its surrogate.
-	 * The internal ID is not exposed to clients.
-	 * 
-	 * @param surrogate the surrogate of a database object
-	 * @return a positive integer
-	 */
-	int getId(Surrogate surrogate);
-
-	/**
 	 * Create a surrogate for a database object.
 	 * 
 	 * @param db the database of the object
@@ -68,7 +42,7 @@ public interface DatabaseMethods {
 	 * @param id the internal ID of the database object
 	 * @return a surrogate
 	 */
-	Surrogate makeSurrogate(Database db, DBObjectType dot, int id);
+	Surrogate makeSurrogate(Database db, DBObjectType dot, DBObjectId id);
 
 	/**
 	 * Create a surrogate for a database object.
@@ -77,6 +51,6 @@ public interface DatabaseMethods {
 	 * @param id the internal ID of the database object
 	 * @return a surrogate
 	 */
-	Surrogate makeSurrogate(DBObject dBObject, int id);
+	Surrogate makeSurrogate(DBObject dBObject, DBObjectId id);
 	
 }

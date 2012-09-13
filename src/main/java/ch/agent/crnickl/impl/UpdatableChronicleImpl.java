@@ -207,7 +207,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 			throw T2DBMsg.exception(D.D50108, s.getName(true));
 		SeriesDefinition schema = getSchema(true).getSeriesDefinition(seriesName, true);
 		UpdatableSeries<T> u = new UpdatableSeriesImpl<T>(this, seriesName, schema.getNumber(), 
-				new SurrogateImpl(getDatabase(), DBObjectType.SERIES, 0));
+				new SurrogateImpl(getDatabase(), DBObjectType.SERIES, null));
 		seriesUpdate.put(seriesName, u);
 		return u;
 	}
@@ -236,7 +236,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 				} else
 					throw T2DBMsg.exception(D.D40126, name, getName(true));
 			}
-			UpdatableChronicleImpl ent = new UpdatableChronicleImpl(new SurrogateImpl(getDatabase(), DBObjectType.CHRONICLE, 0));
+			UpdatableChronicleImpl ent = new UpdatableChronicleImpl(new SurrogateImpl(getDatabase(), DBObjectType.CHRONICLE, null));
 			ent.collection = this;
 			ent.name = name;
 			ent.description = description;

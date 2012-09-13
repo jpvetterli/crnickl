@@ -89,7 +89,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	 * @param name the name of the database
 	 */
 	public DatabaseBackendImpl(String name) {
-		topChronicle = new NameSpace(name, String.format("%s (%s)", getClass().getSimpleName(), name), new SurrogateImpl(this, DBObjectType.CHRONICLE, 0));
+		topChronicle = new NameSpace(name, String.format("%s (%s)", getClass().getSimpleName(), name), new SurrogateImpl(this, DBObjectType.CHRONICLE, null));
 		setMessageListener(null);
 		nm = new NamingPolicy();
 		am = new HashMap<String, ValueAccessMethods<?>>();
@@ -730,12 +730,12 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	@Override
 	public <T> UpdatableValueType<T> createValueType(String name, boolean restricted, String scannerClassOrKeyword) throws T2DBException {
 		return new UpdatableValueTypeImpl<T>(name, restricted, scannerClassOrKeyword, null,  
-				new SurrogateImpl(this, DBObjectType.VALUE_TYPE, 0));
+				new SurrogateImpl(this, DBObjectType.VALUE_TYPE, null));
 	}
 	
 	@Override
 	public <T> UpdatableProperty<T> createProperty(String name,	ValueType<T> valueType, boolean indexed) throws T2DBException {
-		Surrogate	surrogate = new SurrogateImpl(this, DBObjectType.PROPERTY, 0);
+		Surrogate	surrogate = new SurrogateImpl(this, DBObjectType.PROPERTY, null);
 		return new UpdatablePropertyImpl<T>(name, valueType, indexed, surrogate);
 	}
 	
@@ -750,7 +750,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 				throw T2DBMsg.exception(D.D30109, name, nameOfBase);
 			base = list.iterator().next();
 		}
-		Surrogate surrogate = new SurrogateImpl(this, DBObjectType.SCHEMA, 0);
+		Surrogate surrogate = new SurrogateImpl(this, DBObjectType.SCHEMA, null);
 		return new UpdatableSchemaImpl(name, base, null, null, surrogate);
 	}
 	

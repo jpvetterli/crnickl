@@ -29,7 +29,6 @@ import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.AttributeDefinition;
-import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.SeriesDefinition;
@@ -185,7 +184,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 		AttributeDefinitionImpl<String> def = (AttributeDefinitionImpl<String>) 
 			editSeriesAttributeDefinition(seriesNr, DatabaseBackend.MAGIC_NAME_NR, false);
 		if (def == null) {
-			Property<String> property = (Property<String>) getBuiltInProperty(DatabaseBackend.MAGIC_NAME_NR);
+			Property<String> property = (Property<String>) getDatabase().getSymbolBuiltInProperty();
 			def = (AttributeDefinitionImpl<String>) addAttribute(seriesNr, DatabaseBackend.MAGIC_NAME_NR);
 			def.setProperty(property);
 		}
@@ -198,7 +197,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 		AttributeDefinitionImpl<ValueType<?>> def = (AttributeDefinitionImpl<ValueType<?>>) 
 			editSeriesAttributeDefinition(seriesNr, DatabaseBackend.MAGIC_TYPE_NR, false);
 		if (def == null) {
-			Property<ValueType<?>> property = (Property<ValueType<?>>) getBuiltInProperty(DatabaseBackend.MAGIC_TYPE_NR);
+			Property<ValueType<?>> property = (Property<ValueType<?>>) getDatabase().getTypeBuiltInProperty();
 			def = (AttributeDefinitionImpl<ValueType<?>>) addAttribute(seriesNr, DatabaseBackend.MAGIC_TYPE_NR);
 			def.setProperty(property);
 		}
@@ -207,10 +206,8 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 
 	@Override
 	public void setSeriesType(int seriesNr, String type) throws T2DBException {
-		DatabaseBackend db = ((SurrogateImpl)getSurrogate()).getDatabase();
-		Surrogate surrogate = new SurrogateImpl(db, DBObjectType.VALUE_TYPE, DatabaseBackend.MAGIC_TYPE_NR);
-		@SuppressWarnings({ "rawtypes" })
-		ValueType<ValueType> vt = db.getValueType(surrogate);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ValueType<ValueType> vt = (ValueType<ValueType>) getDatabase().getTypeBuiltInProperty().getValueType();
 		setSeriesType(seriesNr, vt.scan(type));
 	}
 	
@@ -220,7 +217,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 		AttributeDefinitionImpl<TimeDomain> def = (AttributeDefinitionImpl<TimeDomain>) 
 			editSeriesAttributeDefinition(seriesNr, DatabaseBackend.MAGIC_TIMEDOMAIN_NR, false);
 		if (def == null) {
-			Property<TimeDomain> property = (Property<TimeDomain>) getBuiltInProperty(DatabaseBackend.MAGIC_TIMEDOMAIN_NR);
+			Property<TimeDomain> property = (Property<TimeDomain>) getDatabase().getTimeDomainBuiltInProperty();
 			def = (AttributeDefinitionImpl<TimeDomain>) addAttribute(seriesNr, DatabaseBackend.MAGIC_TIMEDOMAIN_NR);
 			def.setProperty(property);
 		}
@@ -233,7 +230,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 		AttributeDefinitionImpl<Boolean> def = (AttributeDefinitionImpl<Boolean>) 
 				editSeriesAttributeDefinition(seriesNr, DatabaseBackend.MAGIC_SPARSITY_NR, false);
 			if (def == null) {
-				Property<Boolean> property = (Property<Boolean>) getBuiltInProperty(DatabaseBackend.MAGIC_SPARSITY_NR);
+				Property<Boolean> property = (Property<Boolean>) getDatabase().getSparsityBuiltInProperty();
 				def = (AttributeDefinitionImpl<Boolean>) addAttribute(seriesNr, DatabaseBackend.MAGIC_SPARSITY_NR);
 				def.setProperty(property);
 			}
@@ -501,12 +498,6 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 //
 //	}
 
-	private Property<?> getBuiltInProperty(int magicNumber) throws T2DBException {
-		SurrogateImpl thisKey = (SurrogateImpl) getSurrogate();
-		Surrogate propKey = new SurrogateImpl(thisKey.getDatabase(), DBObjectType.PROPERTY, magicNumber);
-		return thisKey.getDatabase().getProperty(propKey);
-	}
-	
 	/**
 	 * Merge a schema into this schema.
 	 * 

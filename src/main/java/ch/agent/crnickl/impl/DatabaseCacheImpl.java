@@ -34,6 +34,7 @@ import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.MessageListener;
 import ch.agent.crnickl.api.Property;
@@ -301,7 +302,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	private SchemaImpl ref(SchemaImpl schema) {
 		SchemaImpl esh = null;
 		if (schema != null) {
-			Integer id = ((SurrogateImpl) schema.getSurrogate()).getId();
+			DBObjectId id = schema.getId();
 			SchemaRefCounter ref = schemaCache.get(id);
 			if (ref == null) {
 				try {
@@ -342,7 +343,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	}
 	
 	private void unRef(SchemaImpl schema) {
-		Integer id = ((SurrogateImpl) schema.getSurrogate()).getId();
+		DBObjectId id = schema.getId();
 		SchemaRefCounter ref = schemaCache.get(id);
 		if (ref.decr() < 1) {
 			schemaCache.remove(id);
@@ -364,7 +365,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	 * @return
 	 */
 	private Property<?> ref(Property<?> property) {
-		Integer id = ((SurrogateImpl) property.getSurrogate()).getId();
+		DBObjectId id = property.getId();
 		PropertyRefCounter ref = propCache.get(id);
 		Property<?> p = null;
 		if (ref == null) {
@@ -379,7 +380,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	}
 	
 	private void unRef(Property<?> property) {
-		Integer id = ((SurrogateImpl) property.getSurrogate()).getId();
+		DBObjectId id = property.getId();
 		PropertyRefCounter ref = propCache.get(id);
 		if (ref.decr() < 1) {
 			propCache.remove(id);
@@ -408,8 +409,8 @@ public class DatabaseCacheImpl implements DatabaseCache {
 
 	@Override
 	public void clear(Chronicle chronicle) {
-		Integer id = ((SurrogateImpl) chronicle.getSurrogate()).getId();
-		if (id != 0) {
+		DBObjectId id = chronicle.getId();
+		if (id != null) {
 			ChronicleImpl e = byIdCache.remove(id);
 			if (e != null)
 				remove(e);

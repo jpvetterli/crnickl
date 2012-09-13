@@ -21,6 +21,7 @@ package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.DBObject;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
@@ -34,54 +35,12 @@ import ch.agent.crnickl.api.Surrogate;
 public class DatabaseMethodsImpl implements DatabaseMethods, PermissionChecker {
 
 	@Override
-	public int getId(DBObject dBObject) {
-		try {
-			int id = (((SurrogateImpl) dBObject.getSurrogate()).getId()).intValue();
-			if (id < 1)
-				throw new RuntimeException("bug (database integrity violation)");
-			return id;
-		} catch(ClassCastException e) {
-			throw new RuntimeException("bug: " + dBObject.toString(), e);
-		}
-	}
-
-	@Override
-	public int getIdOrZero(DBObject dBObject) {
-		try {
-			int id = 0;
-			if (dBObject != null) {
-				SurrogateImpl key = (SurrogateImpl) dBObject.getSurrogate();
-				if (!key.inConstruction()) {
-					id = key.getId().intValue();
-					if (id < 1)
-						throw new RuntimeException("bug (database integrity violation)");
-				}
-			}
-			return id;
-		} catch(ClassCastException e) {
-			throw new RuntimeException("bug: " + dBObject.toString(), e);
-		}
-	}
-
-	@Override
-	public int getId(Surrogate surrogate) {
-		try {
-			int id = (((SurrogateImpl) surrogate).getId()).intValue();
-			if (id < 1)
-				throw new RuntimeException("bug (database integrity violation)");
-			return id;
-		} catch(ClassCastException e) {
-			throw new RuntimeException("bug: " + surrogate.toString(), e);
-		}
-	}
-
-	@Override
-	public Surrogate makeSurrogate(Database db, DBObjectType dot, int id) {
+	public Surrogate makeSurrogate(Database db, DBObjectType dot, DBObjectId id) {
 		return new SurrogateImpl((DatabaseBackend) db, dot, id);
 	}
 
 	@Override
-	public Surrogate makeSurrogate(DBObject dBObject, int id) {
+	public Surrogate makeSurrogate(DBObject dBObject, DBObjectId id) {
 		Surrogate s = dBObject.getSurrogate();
 		return makeSurrogate(s.getDatabase(), s.getDBObjectType(), id);
 	}
