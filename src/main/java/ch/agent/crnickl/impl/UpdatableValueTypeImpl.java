@@ -20,7 +20,6 @@
 package ch.agent.crnickl.impl;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,9 +40,7 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 
 	private boolean delete;
 	private String name;
-	private Map<T, String> added;
-	private Map<T, String> edited;
-	private Set<T> deleted;
+	private Map<T, String> values;
 	
 	/**
 	 * Construct an {@link UpdatableValueType}.
@@ -54,9 +51,6 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 	 */
 	protected UpdatableValueTypeImpl(ValueTypeImpl<T> valueType) throws T2DBException {
 		super(valueType);
-		added = new HashMap<T, String>();
-		edited = new HashMap<T, String>();
-		deleted = new HashSet<T>();
 	}
 	
 	/**
@@ -71,17 +65,12 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 	 */
 	public UpdatableValueTypeImpl(String name, boolean restricted, String scannerClassOrKeyword, Map<String, String> valuesAndDescriptions, Surrogate surrogate) throws T2DBException {
 		super(name, restricted, scannerClassOrKeyword, valuesAndDescriptions, surrogate);
-		added = new HashMap<T, String>();
-		edited = new HashMap<T, String>();
-		deleted = new HashSet<T>();
 	}
 	
 	@Override
 	protected void update() throws T2DBException {
 		name = null;
-		added.clear();
-		edited.clear();
-		deleted.clear();
+		values = null;
 		super.update();
 	}
 
@@ -94,16 +83,11 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 		} else {
 			if (getSurrogate().inConstruction()) {
 				getDatabase().create(this);
-				name = null;
-			}
-			if (name != null) {
-				getDatabase().getCache().clear(this);
-				getDatabase().update(this);
-			}
-			if (added.size()> 0 || edited.size() > 0 || deleted.size() > 0) {
-				if (name == null)
+			} else {
+				if (name != null || values != null) {
 					getDatabase().getCache().clear(this);
-				getDatabase().update(this, added, edited, deleted);
+					getDatabase().update(this);
+				}
 			}
 			update();
 		}
@@ -136,16 +120,9 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 
 	@Override
 	public Map<T, String> getValueDescriptions() {
-		if (added.size() > 0 || edited.size() > 0 || deleted.size() > 0) {
-			Map<T, String> v = new HashMap<T, String>(super.getValueDescriptions());
-			for (Map.Entry<T, String> e : added.entrySet())
-				v.put(e.getKey(), e.getValue());
-			for (Map.Entry<T, String> e : edited.entrySet())
-				v.put(e.getKey(), e.getValue());
-			for (T value : deleted)
-				v.remove(value);
-			return v;
-		} else
+		if (values != null)
+			return values;
+		else
 			return super.getValueDescriptions();
 	}
 
@@ -159,7 +136,9 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 			throw T2DBMsg.exception(D.D10120, getName());
 		if (getValues().contains(value))
 			throw T2DBMsg.exception(D.D10121, getName(), value);
-		added.put(value, description);
+		if (values == null)
+			values = new HashMap<T, String>(super.getValueDescriptions());
+		values.put(value, description);
 	}
 
 	@Override
@@ -172,8 +151,9 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 			throw T2DBMsg.exception(D.D10120, getName());
 		if (!getValues().contains(value))
 			throw T2DBMsg.exception(D.D10123, getName(), value);
-		// in all 3 cases (already in edited, existing value, new value) put in edited
-		edited.put(value, description);
+		if (values == null)
+			values = new HashMap<T, String>(super.getValueDescriptions());
+		values.put(value, description);
 	}
 
 	@Override
@@ -184,12 +164,14 @@ public class UpdatableValueTypeImpl<T> extends ValueTypeImpl<T> implements Updat
 			throw T2DBMsg.exception(D.D10120, getName());
 		if (value == null || !getValues().contains(value))
 			throw T2DBMsg.exception(D.D10122, getName(), value);
-		deleted.add(value);
+		if (values == null)
+			values = new HashMap<T, String>(super.getValueDescriptions());
+		values.remove(value);
 	}
 
 	@Override
 	public void destroy() throws T2DBException {
-		if (name != null || added.size() > 0 || edited.size() > 0 || deleted.size() > 0)
+		if (name != null || values != null)
 			throw T2DBMsg.exception(D.D10119, getName());
 		delete = true;
 	}

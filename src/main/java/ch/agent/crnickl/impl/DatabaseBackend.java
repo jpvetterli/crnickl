@@ -21,8 +21,6 @@ package ch.agent.crnickl.impl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Attribute;
@@ -282,24 +280,14 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	void deleteValueType(UpdatableValueType<?> valueType) throws T2DBException;
 	
 	/**
-	 * Update the name of the value type. 
+	 * Update a value type. The name can be updated. In a restricted value
+	 * type, values can be added, their description can be modified, and they
+	 * can be deleted. It is not allowed to delete values in use.
 	 * 
 	 * @param valueType a value type
 	 * @throws T2DBException
 	 */
 	void update(UpdatableValueType<?> valueType) throws T2DBException;
-	
-	/**
-	 * Update the list of allowed values in a value type. 
-	 * It is not allowed to delete values in use.
-	 *
-	 * @param valueType a value type
-	 * @param added a map of values to add and their descriptions
-	 * @param edited a map of values to modify and their descriptions 
-	 * @param deleted a set of values to delete
-	 * @throws T2DBException
-	 */
-	<T>void update(UpdatableValueType<T> valueType, Map<T, String> added, Map<T, String> edited, Set<T> deleted) throws T2DBException;
 	
 	/**
 	 * Create a chronicle in the database. The method saves the chronicle's name, description,
