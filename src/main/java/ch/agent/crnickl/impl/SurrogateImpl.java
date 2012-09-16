@@ -111,7 +111,9 @@ public class SurrogateImpl implements Surrogate {
 			throw new IllegalStateException();
 		if (((SurrogateImpl) surrogate).dot != dot || ((SurrogateImpl) surrogate).id == null)
 			throw new RuntimeException("bug: " + surrogate.toString());
-		id = ((SurrogateImpl) surrogate).id;
+		this.id = ((SurrogateImpl) surrogate).id;
+		this.hashCode = -1;
+		this.string = null;
 	}
 
 	@Override
