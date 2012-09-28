@@ -89,6 +89,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction()) {
+				policy.willUpdate(this);
 				getDatabase().create(this);
 			} else {
 				getDatabase().getCache().clear(this);

@@ -53,7 +53,7 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 			if (def == null) {
 				if (!original.isErasing())
 					policy.willDeleteOrErase(schema, original);
-				// deleting an erasing series is like adding, which is always okay
+				// deleting an erasing series is like adding the series
 			} else {
 				if (def.isErasing() && (original == null || !original.isErasing())) {
 					policy.willDeleteOrErase(schema, def);
@@ -63,27 +63,28 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 
 		@Override
 		public void visit(UpdatableSchema schema, SeriesDefinition seriesDef,
-				AttributeDefinition<?> attrDef, AttributeDefinition<?> origAttrDef)
-				throws T2DBException {
-			if (seriesDef == null) {
-				if (attrDef == null) {
-					if (!origAttrDef.isErasing())
-						policy.willDeleteOrErase(schema, origAttrDef);
-					// deleting an erasing attribute is like adding
-				} else {
-					if (attrDef.isErasing()) {
-						Schema resolved = schema.resolve();
-						AttributeDefinition<?> def = resolved.getAttributeDefinition(attrDef.getNumber(), false);
-						if (def != null)
-							policy.willDeleteOrErase(schema, def);
-					} else if (origAttrDef != null)
-						policy.willUpdate(schema, attrDef);
-				}
-			} else {
-				if (attrDef == null)
+			AttributeDefinition<?> attrDef, AttributeDefinition<?> origAttrDef)
+			throws T2DBException {
+			if (attrDef == null) {
+				if (!origAttrDef.isErasing())
 					policy.willDeleteOrErase(schema, seriesDef, origAttrDef);
-				else if (origAttrDef != null)
-					policy.willUpdate(schema, seriesDef, attrDef);
+				// deleting an erasing attribute is like adding the series
+			} else {
+				if (attrDef.isErasing()) {
+					Schema resolved = schema.resolve();
+					AttributeDefinition<?> def = resolved.getAttributeDefinition(attrDef.getNumber(), false);
+					if (def != null)
+						policy.willDeleteOrErase(schema, seriesDef, def);
+				} else {
+					Property<?> prop = attrDef.getProperty();
+					if (prop == null || prop.inConstruction())
+						throw T2DBMsg.exception(D.D30134, attrDef.getNumber());
+					if (origAttrDef != null)
+						policy.willUpdate(schema, seriesDef, attrDef);
+				
+//					a new attr must have a property, not "in construction"
+//					how about updates of attr defs?
+				}
 			}
 		}
 	}
@@ -137,21 +138,25 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	 */
 	@Override
 	public void willUpdate(UpdatableSchema s) throws T2DBException {
-		UpdatableSchemaImpl schema = (UpdatableSchemaImpl) s;
-		UpdatableSchema base = schema.getBase();
-		UpdatableSchema previousBase = schema.getPreviousBase();
-		boolean baseEdited = false;
-		if (base != null)
-			baseEdited = !base.equals(previousBase);
-		else if (previousBase != null)
-			baseEdited = true;
-		if (baseEdited) {
-			if (schema.edited())
-				throw T2DBMsg.exception(D.D30139, schema.getName());
-			willUpdateBase(schema);
+		try {
+			UpdatableSchemaImpl schema = (UpdatableSchemaImpl) s;
+			UpdatableSchema base = schema.getBase();
+			UpdatableSchema previousBase = schema.getPreviousBase();
+			boolean baseEdited = false;
+			if (base != null)
+				baseEdited = !base.equals(previousBase);
+			else if (previousBase != null)
+				baseEdited = true;
+			if (baseEdited) {
+				if (schema.edited())
+					throw T2DBMsg.exception(D.D30139, schema.getName());
+				willUpdateBase(schema);
+			}
+			// go through all the details of the schema
+			schema.visit(visitor);
+		} catch (T2DBException e) {
+			throw T2DBMsg.exception(e, D.D30105, s.getName());
 		}
-		// go through all the details of the schema
-		schema.visit(visitor);
 	}
 
 	/**
@@ -198,27 +203,6 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	}
 
 	/**
-	 * An attribute definition can be deleted if it is not in use by any chronicle.
-	 * It is in use if there is at least one chronicle with a non-default value for the
-	 * attribute. Such values are in an attribute value table keyed by chronicle and property.
-	 * But the property corresponding to the attribute definition is not unique to the schema
-	 * being inspected here. So the check must only take into account chronicles having this schema
-	 * or having a schema directly or indirectly extending this schema.
-	 */
-	private void willDeleteOrErase(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
-		Collection<Surrogate> entities = database.findChronicles(def.getProperty(), schema);
-		if (entities.size() > 0)
-			throw T2DBMsg.exception(D.D30146, def.getNumber(), schema.getName(), entities.size());
-	}
-
-	/**
-	 * Updating the default value and the description is always allowed. 
-	 * No other update is possible.
-	 */
-	private void willUpdate(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
-	}
-
-	/**
 	 * A series definition can be deleted only if there are no series using it.
 	 */
 	private void willDeleteOrErase(UpdatableSchema schema, SeriesDefinition ss) throws T2DBException {
@@ -228,20 +212,40 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	}
 	
 	/**
-	 * Reject the deletion of a built-in series attribute.
+	 * Reject the deletion of a built-in series attribute. Other series
+	 * attributes can always be deleted because they only have a default value,
+	 * in the schema.
+	 * <p>
+	 * A chronicle attribute definition can be deleted if it is not in use by
+	 * any chronicle. It is in use if there is at least one chronicle with a
+	 * non-default value for the attribute. Such values are in an attribute
+	 * value table keyed by chronicle and property. But the property
+	 * corresponding to the attribute definition is not unique to the schema
+	 * being inspected here. So the check must only take into account chronicles
+	 * having this schema or having a schema directly or indirectly extending
+	 * this schema.
 	 */
 	private void willDeleteOrErase(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
-		if (database.isBuiltIn(def))
-			throw T2DBMsg.exception(D.D30148, def.getNumber(), ss.getNumber(), schema.getName()); 
+		if (ss != null) { 
+			if (database.isBuiltIn(def))
+				throw T2DBMsg.exception(D.D30148, def.getNumber(), ss.getNumber(), schema.getName()); 
+		} else {
+			Collection<Surrogate> entities = database.findChronicles(def.getProperty(), schema);
+			if (entities.size() > 0)
+				throw T2DBMsg.exception(D.D30146, def.getNumber(), schema.getName(), entities.size());
+		}
 	}
 
 	/**
 	 * Reject the update of a built-in series attribute, unless it's the series name. 
+	 * For chronicle attributes, there is no restriction.
 	 * 
 	 */
 	private void willUpdate(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
-		if (database.isBuiltIn(def) && def.getNumber() != DatabaseBackend.MAGIC_NAME_NR)
-			throw T2DBMsg.exception(D.D30149, def.getNumber(), ss.getNumber(), schema.getName()); 
+		if (ss != null) { 
+			if (database.isBuiltIn(def) && def.getNumber() != DatabaseBackend.MAGIC_NAME_NR)
+				throw T2DBMsg.exception(D.D30149, def.getNumber(), ss.getNumber(), schema.getName()); 
+		}
 	}
 
 	@Override

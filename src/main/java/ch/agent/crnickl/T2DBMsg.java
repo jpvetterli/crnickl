@@ -80,6 +80,7 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D20109 = "D20109";
 		public static final String D20110 = "D20110";
 
+		public static final String D30105 = "D30105";
 		public static final String D30106 = "D30106";
 		public static final String D30108 = "D30108";
 		public static final String D30109 = "D30109";
@@ -103,6 +104,7 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D30131 = "D30131";
 		public static final String D30132 = "D30132";
 		public static final String D30133 = "D30133";
+		public static final String D30134 = "D30134";
 		
 		public static final String D30139 = "D30139";
 		public static final String D30140 = "D30140";
