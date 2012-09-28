@@ -55,7 +55,17 @@ public interface UpdatableSchema extends Schema, Updatable {
 	void destroy() throws T2DBException;
 	
 	/**
-	 * Set the name of the schema.
+	 * Resolve into a schema. Resolving an updatable schema
+	 * resolves its base schema recursively, then adds, edits, and deletes
+	 * attributes and series as specified in the updatable schema.
+	 * 
+	 * @return a schema
+	 * @throws T2DBException
+	 */
+	Schema resolve() throws T2DBException;
+
+	/**
+	 * Set the name of the schema. May not be null or empty.
 	 * 
 	 * @param name a string
 	 * @throws T2DBException
@@ -65,7 +75,7 @@ public interface UpdatableSchema extends Schema, Updatable {
 	/**
 	 * Set the base of the schema.
 	 * 
-	 * @param base an updatable schema
+	 * @param base an updatable schema or null
 	 * @throws T2DBException
 	 */
 	void setBase(UpdatableSchema base) throws T2DBException;

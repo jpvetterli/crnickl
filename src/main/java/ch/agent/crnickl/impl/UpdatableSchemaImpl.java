@@ -21,8 +21,11 @@ package ch.agent.crnickl.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
@@ -39,6 +42,14 @@ import ch.agent.t2.time.TimeDomain;
 
 /**
  * Default implementation of {@link UpdatableSchema}.
+ * <p>
+ * Note about cyclical definitions of schemas. Suppose schema a is the parent of
+ * schema b and b of a. It is in principle not possible to create such a cycle
+ * without hacking the database. If for some reason such a cycle occurs, it will
+ * be detected by the resolve method. The code constructing an updatable schema from
+ * its database representation should detect cycles, perform some minimal surgery
+ * in a way which allows detection of the cycle
+ * (like nullifying the parent creating the cycle: a -> b -> a -> null).
  * 
  * @author Jean-Paul Vetterli
  * @version 1.1.0
@@ -49,8 +60,8 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	private UpdatableSchema base;
 	private String editedName;
 	private UpdatableSchema editedBase;
-	private boolean editedBaseSet;
-	
+	private SchemaUpdatePolicy policy;
+
 	/**
 	 * Construct an {@link UpdatableSchema}.
 	 * 
@@ -65,25 +76,25 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 			Collection<SeriesDefinition> seriesDefinitions, Surrogate surrogate) {
 		super(true, name, attributeDefs, seriesDefinitions, surrogate, null);
 		this.base = base;
+		this.editedBase = base;
+		policy = getDatabase().getSchemaUpdatePolicy();
 	}
 
 	@Override
 	public void applyUpdates() throws T2DBException {
 		if (delete) {
 			getDatabase().getCache().clear(this);
+			policy.willDelete(this);
 			getDatabase().deleteSchema(this);
 			delete = false;
 		} else {
 			if (getSurrogate().inConstruction()) {
 				getDatabase().create(this);
-				if (editedBaseSet)
-					base = editedBase;
-				editedBaseSet = false;
-				editedName = null;
-				editedBase = null;
-			} else
+			} else {
 				getDatabase().getCache().clear(this);
-			getDatabase().update(this);
+				policy.willUpdate(this);
+				getDatabase().update(this);
+			}
 			update();
 		}
 	}
@@ -91,10 +102,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	@Override
 	protected void update() throws T2DBException {
 		super.update();
-		if (editedBaseSet)
-			base = editedBase;
-		editedBaseSet = false;
-		editedBase = null;
+		base = editedBase;
 		editedName = null;
 		getAttributeDefinitionsObject().consolidate();
 		getSeriesDefinitionsObject().consolidate();
@@ -120,17 +128,14 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	
 	@Override
 	public void setName(String name) throws T2DBException {
-		if (name != null && name.length() == 0)
-			name = null;
+		if (name == null || name.length() == 0)
+			throw T2DBMsg.exception(D.D01102);
 		this.editedName = name;
 	}
 
 	@Override
 	public UpdatableSchema getBase() {
-		if (editedBase != null)
-			return editedBase;
-		else
-			return base;
+		return editedBase;
 	}
 
 	/**
@@ -146,6 +151,8 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	
 	@Override
 	public void setBase(UpdatableSchema base) throws T2DBException {
+		if (base != null && base.inConstruction())
+			throw T2DBMsg.exception(D.D30128, base.getName());
 		this.editedBase = base;
 	}
 	
@@ -238,21 +245,14 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	}
 
 	/**
-	 * Return the collection of edited series definitions.
+	 * Return the collection of series definitions, edited, deleted, or not
+	 * modified. If no definition was modified, return null.
 	 * 
 	 * @return the collection of edited series definitions
+	 * @throws T2DBException
 	 */
 	public Collection<SeriesDefinition> getEditedSeriesDefinitions() {
 		return getSeriesDefinitionsObject().getEditedComponents();
-	}
-
-	/**
-	 * Return the collection of deleted series definitions.
-	 * 
-	 * @return the collection of deleted series definitions
-	 */
-	public Set<Integer> getDeletedSeriesDefinitions() {
-		return getSeriesDefinitionsObject().getDeletedComponents();
 	}
 
 	@Override
@@ -326,68 +326,13 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	}
 
 	/**
-	 * Return the collection of edited series attribute definitions.
+	 * Returns true if anything was actually modified.
 	 * 
-	 * @param seriesNr a series number
-	 * @return the collection of edited series attribute definitions
-	 * @throws T2DBException
+	 * @return true if anything was actually modified
 	 */
-	public Collection<AttributeDefinition<?>> getEditedAttributeDefinitions(int seriesNr) throws T2DBException {
-		// note: only edited schemas have edited attribute definitions
-		SeriesDefinitionImpl schema = (SeriesDefinitionImpl) findEditedSeriesSchema(seriesNr);
-		return schema == null ?	new ArrayList<AttributeDefinition<?>>() : 
-			schema.getAttributeDefinitionsObject().getEditedComponents();
-	}
-
-	/**
-	 * Return the collection of deleted series attribute definitions.
-	 * 
-	 * @param seriesNr a series number
-	 * @return the collection of deleted series attribute definitions
-	 * @throws T2DBException
-	 */
-	public Set<Integer> getDeletedAttributeDefinitions(int seriesNr) throws T2DBException {
-		// note: only edited schemas have deleted attribute definitions
-		SeriesDefinitionImpl schema = (SeriesDefinitionImpl) findEditedSeriesSchema(seriesNr);
-		return schema == null ? new HashSet<Integer>() : 
-			schema.getAttributeDefinitionsObject().getDeletedComponents();
-	}
-
-	/**
-	 * Return the collection of edited attribute definitions.
-	 * 
-	 * @return the collection of edited attribute definitions
-	 * @throws T2DBException
-	 */
-	public Collection<AttributeDefinition<?>> getEditedAttributeDefinitions() {
-		return getAttributeDefinitionsObject().getEditedComponents();
-	}
-
-	/**
-	 * Return the collection of deleted attribute definitions.
-	 * 
-	 * @return the collection of deleted attribute definitions
-	 * @throws T2DBException
-	 */
-	public Set<Integer> getDeletedAttributeDefinitions() {
-		return getAttributeDefinitionsObject().getDeletedComponents();
-	}
-
-	/**
-	 * Find an edited series definition.
-	 * 
-	 * @param seriesNr a series number
-	 * @return an edited series definition 
-	 * @throws T2DBException
-	 */
-	protected SeriesDefinition findEditedSeriesSchema(int seriesNr) throws T2DBException {
-		SeriesDefinition schema = null;
-		for (SeriesDefinition ss : this.getEditedSeriesDefinitions()) {
-			if (ss.getNumber() == seriesNr) {
-				schema = ss;
-			}
-		}
-		return schema;
+	public boolean edited() {
+		return getAttributeDefinitionsObject().getEditedComponents() != null ||
+				getSeriesDefinitionsObject().getEditedComponents() != null;
 	}
 	
 	/**
@@ -398,7 +343,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	 * @throws T2DBException
 	 */
 	protected SeriesDefinitionImpl startEditingSeriesSchema(int seriesNr) throws T2DBException {
-		SeriesDefinitionImpl sch = (SeriesDefinitionImpl) getSeriesDefinitionsObject().edit(seriesNr);
+		SeriesDefinitionImpl sch = (SeriesDefinitionImpl) getSeriesDefinitionsObject().editComponent(seriesNr);
 		if (sch == null)
 			throw T2DBMsg.exception(D.D30125, seriesNr, getName());
 		return sch;
@@ -412,7 +357,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	 * @throws T2DBException
 	 */
 	protected AttributeDefinitionImpl<?> editAttributeDefinition(int attrNr) throws T2DBException {
-		AttributeDefinitionImpl<?> def = (AttributeDefinitionImpl<?>) getAttributeDefinitionsObject().edit(attrNr);
+		AttributeDefinitionImpl<?> def = (AttributeDefinitionImpl<?>) getAttributeDefinitionsObject().editComponent(attrNr);
 		if (def == null)
 			throw T2DBMsg.exception(D.D30123, attrNr, getName());
 		return def;
@@ -427,7 +372,7 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 	 * @throws T2DBException
 	 */
 	protected AttributeDefinitionImpl<?> editSeriesAttributeDefinition(int seriesNr, int attrNr, boolean mustExist) throws T2DBException {
-		AttributeDefinitionImpl<?> def = (AttributeDefinitionImpl<?>) startEditingSeriesSchema(seriesNr).getAttributeDefinitionsObject().edit(attrNr);
+		AttributeDefinitionImpl<?> def = (AttributeDefinitionImpl<?>) startEditingSeriesSchema(seriesNr).getAttributeDefinitionsObject().editComponent(attrNr);
 		if (def == null && mustExist)
 			throw T2DBMsg.exception(D.D30126, attrNr, seriesNr, getName());
 		return def;
@@ -558,5 +503,148 @@ public class UpdatableSchemaImpl extends SchemaImpl implements UpdatableSchema {
 		return new SchemaImpl(name, getAttributeDefinitions(), getSeriesDefinitions(), surrogate, dependencyList);
 	}
 	
+	@Override
+	public Schema resolve() throws T2DBException {
+		List<UpdatableSchema> schemaList = getSchemaList();
+		// reverse the list to have the base first
+		Collections.reverse(schemaList);
+		UpdatableSchemaImpl result = null;
+		for (UpdatableSchema schema : schemaList) {
+			if (result == null) {
+				result = new UpdatableSchemaImpl(schema.getName(), schema.getBase(), 
+						schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), schema.getSurrogate());
+			} else
+				result.merge(schema);
+		}
+		List<Surrogate> keys = new ArrayList<Surrogate>(schemaList.size());
+		for (Schema sch : schemaList) {
+			keys.add(sch.getSurrogate());
+		}
+		Schema finalResult = result.consolidate(getName(), getSurrogate(), keys);
+		return finalResult;
+	}
+	
+	private List<UpdatableSchema> getSchemaList() throws T2DBException {
+		Set<String> cycleDetector = new LinkedHashSet<String>();
+		List<UpdatableSchema> list = new ArrayList<UpdatableSchema>();
+		UpdatableSchema schema = this;
+		while(schema != null) {
+			if (cycleDetector.contains(schema.getName()))
+				throw T2DBMsg.exception(D.D30110, this.toString(), 
+						format(" -> ", cycleDetector, schema.toString()));
+			cycleDetector.add(schema.getName());
+			list.add(schema);
+			schema = schema.getBase();
+		}
+		return list;
+	}
+	
+	private String format (String sep, Set<String> list, String last) {
+		StringBuffer b = new StringBuffer();
+		for (String el : list) {
+			b.append(el);
+			b.append(sep);
+		}
+		b.append(last);
+		return b.toString();
+	}
+	
+	/**
+	 * Visit all edited attribute and series definitions.
+	 * 
+	 * @param visitor a schema update visitor
+	 * @return the number of components visited
+	 * @throws T2DBException
+	 */
+	public int visit(UpdatableSchemaVisitor visitor) throws T2DBException {
+		
+		int total = 0;
+		
+		// visit edited chronicle attribute definitions 
+		Map<Integer, AttributeDefinition<?>> editedADs = getAttributeDefinitionsObject().getMap(true);
+		if (editedADs != null) {
+			Map<Integer, AttributeDefinition<?>> origADs = getAttributeDefinitionsObject().getMap(false);
+			total += visit(visitor, null, editedADs, origADs);
+		}
+		
+		// visit edited series definitions 
+		Map<Integer, SeriesDefinition> editedSDs = getSeriesDefinitionsObject().getMap(true);
+		if (editedSDs != null) {
+			Map<Integer, SeriesDefinition> originalSDs = getSeriesDefinitionsObject().getMap(false);
+			
+			// visit deleted definitions
+			Set<Integer> deletedSDs = new HashSet<Integer>(originalSDs.keySet());
+			deletedSDs.removeAll(editedSDs.keySet());
+			for (Integer number : deletedSDs) {
+				visitor.visit(this, null, originalSDs.get(number));
+				total++;
+			}
+			
+			// visit new and updated definitions
+			for (SeriesDefinition editedSD : editedSDs.values()) {
+				SeriesDefinition origSD = originalSDs.get(editedSD.getNumber());
+				
+				// the "main part" of the series definition
+				if (!equalIgnoringAttributes(editedSD, origSD)) {
+					visitor.visit(this, editedSD, origSD);
+					total++;
+				}
+				// the attribute definitions
+				Map<Integer, AttributeDefinition<?>> editedSADs = 
+						((SeriesDefinitionImpl) editedSD).getAttributeDefinitionsObject().getMap(true);
+				if (editedSADs != null) {
+					Map<Integer, AttributeDefinition<?>> origSADs = 
+							((SeriesDefinitionImpl) editedSD).getAttributeDefinitionsObject().getMap(false);
+					total += visit(visitor, editedSD, editedSADs, origSADs);
+				}
+			}
+		}
+		return total;
+	}
+
+	protected int visit(UpdatableSchemaVisitor visitor, SeriesDefinition seriesDef,
+			Map<Integer, AttributeDefinition<?>> editedADs,
+			Map<Integer, AttributeDefinition<?>> origADs) throws T2DBException {
+		int total = 0;
+		if (origADs.size() == 0) {
+			// visit new definitions
+			for (AttributeDefinition<?> editedAD : editedADs.values()) {
+				visitor.visit(this, seriesDef, editedAD, null);
+				total++;
+			}
+		} else {
+			// visit deleted definitions
+			Set<Integer> deletedADs = new HashSet<Integer>(origADs.keySet());
+			deletedADs.removeAll(editedADs.keySet());
+			for (Integer number : deletedADs) {
+				visitor.visit(this, seriesDef, null, origADs.get(number));
+				total++;
+			}
+			// visit new and updated definitions
+			for (AttributeDefinition<?> editedAD : editedADs.values()) {
+				AttributeDefinition<?> origAD = origADs.get(editedAD.getNumber());
+				if (!editedAD.equals(origAD)) {
+					visitor.visit(this, seriesDef, editedAD, origAD);
+					total++;
+				}
+			}
+		}
+		return total;
+	}
+
+	/**
+	 * Return true if two series definitions are partially equal.
+	 * Partially equal means all members not managed as attributes are equal.
+	 * @param def
+	 * @param old or null
+	 * @return true if the definitions are partially equal
+	 */
+	private boolean equalIgnoringAttributes(SeriesDefinition def, SeriesDefinition old) {
+		return old != null &&
+			def.isErasing() == old.isErasing() &&
+					def.getDescription() == old.getDescription();
+		// getNumber() assumed to be equal
+		// all other things are attributes
+	}
 	
 }

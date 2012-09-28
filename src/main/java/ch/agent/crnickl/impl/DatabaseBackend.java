@@ -81,12 +81,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final int MAX_MAGIC_NR = 9;
 
 	/** 
-	 * The name of the external parameter specifying the maximum index range.
-	 * <p>
-	 * @see #getNumberIndexMaxRange()
-	 */
-	public static final String DB_PARAM_Int_NUMBER_INDEX_MAX_RANGE = "dbNumberIndexMaxRange";
-	/** 
 	 * The name of the external parameter specifying the threshold for indexing names.
 	 * <p>
 	 * @see #getNameIndexThreshold()
@@ -118,10 +112,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 */
 	public static final String DB_PARAM_Class_PermissionChecker = "dbPermissionChecker";
 	/**
-	 * The default maximum index range.
-	 */
-	public static final int DB_PARAM_Int_NUMBER_INDEX_MAX_RANGE_DEFAULT = 100;
-	/**
 	 * The default threshold for the name index.
 	 */
 	public static final int DB_PARAM_Int_NAME_INDEX_THRESHOLD_DEFAULT = 5;
@@ -140,15 +130,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 */
 	public static final boolean DB_PARAM_Boolean_STRICT_NAME_SPACE_DEFAULT = false;
 
-	/**
-	 * Return the maximum range of numbers for which <em>indexed</em> access by number to
-	 * series or attributes will be supported. A negative number is
-	 * interpreted as a request not to provide indexed access.
-	 * 
-	 * @return the maximum range for which to provide by-number indexing in schemas
-	 */
-	int getNumberIndexMaxRange();
-	
 	/**
 	 * Return the threshold above which <em>indexed</em> access by name to series and attributes 
 	 * will be supported. A negative number is interpreted as a request not to provide
@@ -533,30 +514,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	void deleteSchema(UpdatableSchema schema) throws T2DBException;
 	
 	/**
-	 * Delete an attribute in a schema from the database.
-	 * 
-	 * @param schema
-	 *            a schema
-	 * @param seriesNr
-	 *            a series number or 0 for chronicle attributes
-	 * @param attribNr
-	 *            an attribute number
-	 * @throws T2DBException
-	 */
-	void deleteAttributeInSchema(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException;
-	
-	/**
-	 * Delete a series in a schema from the database.
-	 * 
-	 * @param schema
-	 *            a schema
-	 * @param seriesNr
-	 *            a series number
-	 * @throws T2DBException
-	 */
-	void deleteSeriesInSchema(UpdatableSchema schema, int seriesNr) throws T2DBException;
-	
-	/**
 	 * Get a schema from the database.
 	 * 
 	 * @param surrogate a schema's surrogate
@@ -584,50 +541,43 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	UpdatableSchema getUpdatableSchema(Schema schema) throws T2DBException;
 	
 	/**
-	 * Resolve an updatable schema.
-	 * 
-	 * @param schema an updatable schema
-	 * @return a schema
-	 * @throws T2DBException
-	 */
-	Schema resolve(UpdatableSchema schema) throws T2DBException;
-
-	/**
-	 * Return all chronicles referencing any of the schemas in the argument.
+	 * Return all chronicles referencing a given schema.
 	 * The result is a collection of {@link Surrogate} objects.
 	 * <p>
 	 * This is technical method used in schema management.
 	 * 
-	 * @param schemas a collection of schemas
+	 * @param schema a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(Collection<UpdatableSchema> schemas) throws T2DBException;
+	Collection<Surrogate> findChronicles(Schema schema) throws T2DBException;
 
 	/**
-	 * Return all chronicles with an attribute value for the given property and the schema in
-	 * the collection of schemas.
+	 * Return all chronicles with an attribute value for the given property and
+	 * schema.
 	 * <p>
 	 * This is technical method used in schema management.
 	 * 
-	 * @param property a property
-	 * @param schemas a collection of schemas
+	 * @param property
+	 *            a property
+	 * @param schema
+	 *            a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(Property<?> property, Collection<UpdatableSchema> schemas) throws T2DBException;
+	Collection<Surrogate> findChronicles(Property<?> property, Schema schemas) throws T2DBException;
 
 	/**
-	 * Return all chronicles with a series corresponding to the series definition and the schema in
-	 * the collection of schemas.
+	 * Return all chronicles with a series corresponding to the series definition 
+	 * and with a schema dependent on the given schema.
 	 * <p>
 	 * This is technical method used in schema management.
 	 * 
 	 * @param ss a series definition
-	 * @param schemas a collection of schemas
+	 * @param schema a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(SeriesDefinition ss, Collection<UpdatableSchema> schemas) throws T2DBException;
+	Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException;
 	
 }

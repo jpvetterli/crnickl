@@ -20,21 +20,17 @@
 package ch.agent.crnickl.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.AttributeDefinition;
+import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableSchema;
+import ch.agent.crnickl.api.ValueType;
 
 /**
  * Default implementation of {@link SchemaUpdatePolicy}.
@@ -44,7 +40,57 @@ import ch.agent.crnickl.api.UpdatableSchema;
  */
 public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 
+	private static class Visitor implements UpdatableSchemaVisitor {
+
+		private SchemaUpdatePolicyImpl policy;
+
+		private Visitor(SchemaUpdatePolicyImpl policy) {
+			this.policy = policy;
+		}
+
+		@Override
+		public void visit(UpdatableSchema schema, SeriesDefinition def,	SeriesDefinition original) throws T2DBException {
+			if (def == null) {
+				if (!original.isErasing())
+					policy.willDeleteOrErase(schema, original);
+				// deleting an erasing series is like adding, which is always okay
+			} else {
+				if (def.isErasing() && (original == null || !original.isErasing())) {
+					policy.willDeleteOrErase(schema, def);
+				}
+			}
+		}
+
+		@Override
+		public void visit(UpdatableSchema schema, SeriesDefinition seriesDef,
+				AttributeDefinition<?> attrDef, AttributeDefinition<?> origAttrDef)
+				throws T2DBException {
+			if (seriesDef == null) {
+				if (attrDef == null) {
+					if (!origAttrDef.isErasing())
+						policy.willDeleteOrErase(schema, origAttrDef);
+					// deleting an erasing attribute is like adding
+				} else {
+					if (attrDef.isErasing()) {
+						Schema resolved = schema.resolve();
+						AttributeDefinition<?> def = resolved.getAttributeDefinition(attrDef.getNumber(), false);
+						if (def != null)
+							policy.willDeleteOrErase(schema, def);
+					} else if (origAttrDef != null)
+						policy.willUpdate(schema, attrDef);
+				}
+			} else {
+				if (attrDef == null)
+					policy.willDeleteOrErase(schema, seriesDef, origAttrDef);
+				else if (origAttrDef != null)
+					policy.willUpdate(schema, seriesDef, attrDef);
+			}
+		}
+	}
+
+	
 	private DatabaseBackend database;
+	private UpdatableSchemaVisitor visitor;
 
 	/**
 	 * Construct a {@link SchemaUpdatePolicy}.
@@ -53,6 +99,7 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	 */
 	public SchemaUpdatePolicyImpl(DatabaseBackend database) {
 		this.database = database;
+		this.visitor = new Visitor(this);
 	}
 
 	/**
@@ -74,9 +121,7 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 			throw T2DBMsg.exception(D.D30140, schema.getName(), count);
 		
 		// (2) cannot delete if schema explicitly referenced by an entity
-		schemas.clear();
-		schemas.add(schema);
-		Collection<Surrogate> entities = database.findChronicles(schemas);
+		Collection<Surrogate> entities = database.findChronicles(schema);
 		if (entities.size() > 0)
 			throw T2DBMsg.exception(D.D30141, schema.getName(), entities.size());
 	}
@@ -101,14 +146,12 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 		else if (previousBase != null)
 			baseEdited = true;
 		if (baseEdited) {
-			boolean otherEdits = schema.getDeletedAttributeDefinitions().size()
-					+ schema.getEditedAttributeDefinitions().size()
-					+ schema.getDeletedSeriesDefinitions().size()
-					+ schema.getEditedSeriesDefinitions().size() > 0;
-			if (otherEdits)
+			if (schema.edited())
 				throw T2DBMsg.exception(D.D30139, schema.getName());
 			willUpdateBase(schema);
 		}
+		// go through all the details of the schema
+		schema.visit(visitor);
 	}
 
 	/**
@@ -117,33 +160,44 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	private void willUpdateBase(UpdatableSchema s) throws T2DBException {
 		UpdatableSchemaImpl schema = (UpdatableSchemaImpl) s;
 		String baseSchemaName = schema.getBase() == null ? null : schema.getBase().getName();
-		UpdatableSchema currentUES = new UpdatableSchemaImpl(schema.getName(), 
+		UpdatableSchemaImpl currentUES = new UpdatableSchemaImpl(schema.getName(), 
 				schema.getPreviousBase(), schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), 
 				schema.getSurrogate());
-		UpdatableSchema editedUES = new UpdatableSchemaImpl(schema.getName(), 
+		UpdatableSchemaImpl editedUES = new UpdatableSchemaImpl(schema.getName(), 
 				schema.getBase(), schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), 
 				schema.getSurrogate());
-		Schema current = database.resolve(currentUES);
-		Schema edited = database.resolve(editedUES);
-		if (current.getAttributeDefinitions().size() > edited.getAttributeDefinitions().size())
-			throw T2DBMsg.exception(D.D30142, baseSchemaName);
-		if (current.getSeriesDefinitions().size() > edited.getSeriesDefinitions().size())
-			throw T2DBMsg.exception(D.D30143, baseSchemaName);
-		for (AttributeDefinition<?> def : current.getAttributeDefinitions()) {
-			if (!def.equals(edited.getAttributeDefinition(def.getNumber(), false)))
-				throw T2DBMsg.exception(D.D30144, baseSchemaName, def.getNumber());
+		
+		Schema current = null;
+		try {
+			current = currentUES.resolve();
+		} catch (T2DBException e) {
+			// If exception caused by cycle, let pass, so user can repair.
+			if (!e.getMsg().getKey().equals(D.D30110))
+				throw e;
 		}
-		for (SeriesDefinition ss : current.getSeriesDefinitions()) {
+		// Hint: for testing broken schemas, let pass resolution exception on edited.
+		Schema edited = editedUES.resolve();
+		
+		if (current != null) {
+			if (current.getAttributeDefinitions().size() > edited.getAttributeDefinitions().size())
+				throw T2DBMsg.exception(D.D30142, baseSchemaName);
+			if (current.getSeriesDefinitions().size() > edited.getSeriesDefinitions().size())
+				throw T2DBMsg.exception(D.D30143, baseSchemaName);
 			for (AttributeDefinition<?> def : current.getAttributeDefinitions()) {
 				if (!def.equals(edited.getAttributeDefinition(def.getNumber(), false)))
-					throw T2DBMsg.exception(D.D30145, baseSchemaName, def.getNumber(), ss.getNumber());
+					throw T2DBMsg.exception(D.D30144, baseSchemaName, def.getNumber());
+			}
+			for (SeriesDefinition ss : current.getSeriesDefinitions()) {
+				for (AttributeDefinition<?> def : current.getAttributeDefinitions()) {
+					if (!def.equals(edited.getAttributeDefinition(def.getNumber(), false)))
+						throw T2DBMsg.exception(D.D30145, baseSchemaName,
+								def.getNumber(), ss.getNumber());
+				}
 			}
 		}
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * An attribute definition can be deleted if it is not in use by any chronicle.
 	 * It is in use if there is at least one chronicle with a non-default value for the
 	 * attribute. Such values are in an attribute value table keyed by chronicle and property.
@@ -151,103 +205,55 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	 * being inspected here. So the check must only take into account chronicles having this schema
 	 * or having a schema directly or indirectly extending this schema.
 	 */
-	@Override
-	public void willDelete(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
-		
-		Set<UpdatableSchema> schemas = findDependentSchemas(schema);
-		// remove those schemas where the attribute was "erased"
-		Iterator<UpdatableSchema> it = schemas.iterator();
-		while(it.hasNext()) {
-			UpdatableSchema s = it.next();
-			if (s.getAttributeDefinition(def.getNumber(), false) == null)
-				it.remove();
-		}
-		
-		Collection<Surrogate> entities = database.findChronicles(def.getProperty(), schemas);
+	private void willDeleteOrErase(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
+		Collection<Surrogate> entities = database.findChronicles(def.getProperty(), schema);
 		if (entities.size() > 0)
 			throw T2DBMsg.exception(D.D30146, def.getNumber(), schema.getName(), entities.size());
 	}
 
-	private Set<UpdatableSchema> findDependentSchemas(UpdatableSchema schema) throws T2DBException {
-		// beware of cycles
-		Collection<UpdatableSchema> schemas = database.getUpdatableSchemas("*");
-		Map<String, UpdatableSchema> bases = new HashMap<String, UpdatableSchema>(schemas.size());
-		for (UpdatableSchema s : schemas) {
-			bases.put(s.getName(), s.getBase());
-		}
-		String name = schema.getName();
-		Set<UpdatableSchema> result = new HashSet<UpdatableSchema>();
-		result.add(schema);
-		Set<String> cycleDetector = new LinkedHashSet<String>();
-		for (UpdatableSchema s : schemas) {
-			UpdatableSchema base = s.getBase();
-			cycleDetector.clear();
-			cycleDetector.add(s.getName());
-			while (base != null) {
-				if (base.getName().equals(name)) {
-					if (!cycleDetector.add(base.getName()))
-						throw T2DBMsg.exception(D.D30147, schema.getName(), cycleDetector.toString());
-					result.add(s);
-					break;
-				} else
-					base = base.getBase();
-			}
-		}
-		return result;
-	}
-	
 	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Updating the default value is always allowed. No other update allowed. 
-	 * This policy is implemented in the lower layer.
+	 * Updating the default value and the description is always allowed. 
+	 * No other update is possible.
 	 */
-	@Override
-	public void willUpdate(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
+	private void willUpdate(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * A series definition can be deleted only if there are no series using it.
 	 */
-	@Override
-	public void willDelete(UpdatableSchema schema, SeriesDefinition ss) throws T2DBException {
-		Set<UpdatableSchema> schemas = findDependentSchemas(schema);
-		// remove those schemas where the series was "erased"
-		Iterator<UpdatableSchema> it = schemas.iterator();
-		while(it.hasNext()) {
-			UpdatableSchema s = it.next();
-			if (s.getSeriesDefinition(ss.getNumber(), false) == null)
-				it.remove();
-		}
-		
-		Collection<Surrogate> entities = database.findChronicles(ss, schemas);
+	private void willDeleteOrErase(UpdatableSchema schema, SeriesDefinition ss) throws T2DBException {
+		Collection<Surrogate> entities = database.findChronicles(ss, schema);
 		if (entities.size() > 0)
 			throw T2DBMsg.exception(D.D30150, ss.getNumber(), schema.getName(), entities.size());
 	}
-
+	
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * Reject the deletion of a built-in series attribute.
 	 */
-	@Override
-	public void willDelete(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
+	private void willDeleteOrErase(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
 		if (database.isBuiltIn(def))
 			throw T2DBMsg.exception(D.D30148, def.getNumber(), ss.getNumber(), schema.getName()); 
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
 	 * Reject the update of a built-in series attribute, unless it's the series name. 
 	 * 
 	 */
-	@Override
-	public void willUpdate(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
+	private void willUpdate(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException {
 		if (database.isBuiltIn(def) && def.getNumber() != DatabaseBackend.MAGIC_NAME_NR)
 			throw T2DBMsg.exception(D.D30149, def.getNumber(), ss.getNumber(), schema.getName()); 
 	}
 
+	@Override
+	public <T> void willDelete(Property<T> property) throws T2DBException {
+	}
+
+	@Override
+	public <T> void willDelete(ValueType<T> valueType) throws T2DBException {
+	}
+
+	@Override
+	public <T> void willDelete(ValueType<T> valueType, T value)	throws T2DBException {
+	}
+	
 }

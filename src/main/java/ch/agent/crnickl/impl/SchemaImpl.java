@@ -77,12 +77,10 @@ public class SchemaImpl extends DBObjectImpl implements Schema {
 		this.name = name;
 		DatabaseBackend database = ((SurrogateImpl) surrogate).getDatabase();
 		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs, 
-				database.getNameIndexThreshold(), -1, null);
+				database.getNameIndexThreshold());
 			
 		this.seriesDefinitions = new SchemaComponents<SeriesDefinition>(seriesDefinitions, 
-				database.getNameIndexThreshold(), 
-				database.getNumberIndexMaxRange(),
-				new SeriesDefinition[0]);
+				database.getNameIndexThreshold());
 		this.dependencyList = dependencyList;
 	}
 	
@@ -93,9 +91,9 @@ public class SchemaImpl extends DBObjectImpl implements Schema {
 		// load the whole stuff again, it's expected to be a rare operation 
 		SchemaImpl schema = null;
 		if (updatable)
-			schema = (SchemaImpl) getDatabase().getSchema(getSurrogate());
-		else
 			schema = (SchemaImpl) getDatabase().getUpdatableSchema(getSurrogate());
+		else
+			schema = (SchemaImpl) getDatabase().getSchema(getSurrogate());
 		this.name = schema.name;
 		this.seriesDefinitions = schema.seriesDefinitions;
 		this.attributes = schema.attributes;

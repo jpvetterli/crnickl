@@ -21,9 +21,7 @@ package ch.agent.crnickl.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -42,7 +40,6 @@ import ch.agent.crnickl.api.NamingPolicy;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.Series;
-import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableChronicle;
 import ch.agent.crnickl.api.UpdatableProperty;
@@ -79,7 +76,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	private ChronicleUpdatePolicy eup;
 	private NamingPolicy nm;
 	private boolean strictNameSpaceMode;
-	private int maxSeriesNumberRange;
 	private int nameIndexThreshold;
 	private Map<String, ValueAccessMethods<?>> am;
 	
@@ -150,51 +146,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		am.put(valueTypeExternalRepresentation, (ValueAccessMethods<?>)accessMethods);
 	}
 	
-	/**
-	 * Create part of a schema in the database.
-	 * 
-	 * @param schema
-	 *            a schema
-	 * @param seriesNr
-	 *            a series number
-	 * @param description
-	 *            a string
-	 * @param def
-	 *            an attribute definition
-	 * @throws T2DBException
-	 */
-	public abstract void create(UpdatableSchema schema, int seriesNr, String description,
-			AttributeDefinition<?> def) throws T2DBException;
-	
-	/**
-	 * Update part of a schema in the database.
-	 * 
-	 * @param schema
-	 *            a schema
-	 * @param seriesNr
-	 *            a series number
-	 * @param description
-	 *            a string
-	 * @param def
-	 *            an attribute definition
-	 * @throws T2DBException
-	 */
-	public abstract void update(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException;
-	
-	/**
-	 * Update a schema's base schema and name in the database.
-	 * 
-	 * @param schema
-	 *            a schema to update
-	 * @param base
-	 *            a schema
-	 * @param name
-	 *            a string
-	 * @return true if anything done
-	 * @throws T2DBException
-	 */
-	public abstract boolean update(UpdatableSchema schema, UpdatableSchema base, String name) throws T2DBException;
-
 	@Override
 	public boolean isStrictNameSpaceMode() {
 		return strictNameSpaceMode;
@@ -259,13 +210,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 			throw T2DBMsg.exception(e, D.D00108, DatabaseBackend.DB_PARAM_Boolean_STRICT_NAME_SPACE, parameter);
 		}
 		
-		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_NUMBER_INDEX_MAX_RANGE, false);
-		try {
-			maxSeriesNumberRange = parameter == null ? DatabaseBackend.DB_PARAM_Int_NUMBER_INDEX_MAX_RANGE_DEFAULT : new Integer(parameter);
-		} catch (Exception e) {
-			throw T2DBMsg.exception(e, D.D00108, DatabaseBackend.DB_PARAM_Int_NUMBER_INDEX_MAX_RANGE, parameter);
-		}	
-		
 		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_NAME_INDEX_THRESHOLD, false);
 		try {
 			nameIndexThreshold = parameter == null ? DB_PARAM_Int_NAME_INDEX_THRESHOLD_DEFAULT : new Integer(parameter);
@@ -323,7 +267,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 			eup = new ChronicleUpdatePolicyImpl(this, eupx);
 		return eup;
 	}
-
+	
 	@Override
 	public SchemaUpdatePolicy getSchemaUpdatePolicy() {
 		if (sup == null)
@@ -388,11 +332,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	@Override
 	public void check(Permission permission, Surrogate surrogate) throws T2DBException {
 		getPermissionChecker().check(permission, surrogate);
-	}
-
-	@Override
-	public int getNumberIndexMaxRange() {
-		return maxSeriesNumberRange;
 	}
 
 	@Override
@@ -544,129 +483,9 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	@Override
 	public Schema getSchema(Surrogate surrogate) throws T2DBException {
 		checkSurrogate(surrogate, DBObjectType.SCHEMA);
-		return resolve(getUpdatableSchema(surrogate));
+		return getUpdatableSchema(surrogate).resolve();
 	}
 	
-	@Override
-	public Schema resolve(UpdatableSchema uschema) throws T2DBException {
-		List<UpdatableSchema> schemaList = getSchemaList(uschema);
-		// the name will be the name of the consolidated schema 
-		String name = uschema.getName(); 
-		Surrogate surrogate = uschema.getSurrogate(); 
-		// reverse the list to have the base first
-		Collections.reverse(schemaList);
-		UpdatableSchemaImpl result = null;
-		for (UpdatableSchema schema : schemaList) {
-			if (result == null) {
-				result = new UpdatableSchemaImpl(schema.getName(), schema.getBase(), 
-						schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), schema.getSurrogate());
-			} else
-				result.merge(schema);
-		}
-		List<Surrogate> keys = new ArrayList<Surrogate>(schemaList.size());
-		for (Schema sch : schemaList) {
-			keys.add(sch.getSurrogate());
-		}
-		Schema finalResult = result.consolidate(name, surrogate, keys);
-		return finalResult;
-	}
-	
-	private List<UpdatableSchema> getSchemaList(UpdatableSchema schema) throws T2DBException {
-		List<UpdatableSchema> list = new ArrayList<UpdatableSchema>();
-		while(schema != null) {
-			list.add(schema);
-			schema = schema.getBase();
-		}
-		return list;
-	}
-	
-	@Override
-	public void update(UpdatableSchema schema) throws T2DBException {
-		update((UpdatableSchemaImpl) schema, getSchemaUpdatePolicy());
-		((UpdateEventPublisherImpl)getUpdateEventPublisher()).publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, schema), false);
-	}
-	
-	/**
-	 * Update a schema in the database.
-	 * 
-	 * @param schema a schema
-	 * @param policy a schema update policy
-	 * @return true if anything was done
-	 * @throws T2DBException
-	 */
-	protected boolean update(UpdatableSchemaImpl schema, SchemaUpdatePolicy policy) throws T2DBException {
-		boolean done = false;
-		try {
-			
-			policy.willUpdate(schema);
-			
-			done = update(schema, schema.getBase(), schema.getName());
-			
-			for (Integer attribNr : schema.getDeletedAttributeDefinitions()) {
-				policy.willDelete(schema, schema.getAttributeDefinition(attribNr, true));
-				deleteAttributeInSchema(schema, 0, attribNr);
-				done = true;
-			}
-			for (AttributeDefinition<?> def : schema.getEditedAttributeDefinitions()) {
-				if (schema.getAttributeDefinition(def.getNumber(), false) == null) {
-					create(schema, 0, null, def);
-				} else {
-					policy.willUpdate(schema, def);
-					update(schema, 0, null, def);
-				}
-				done = true;
-			}
-			for (Integer seriesNr : schema.getDeletedSeriesDefinitions()) {
-				SeriesDefinition ss = schema.getSeriesDefinition(seriesNr, true);
-				policy.willDelete(schema, ss);
-				deleteSeriesInSchema(schema, ss.getNumber());
-				done = true;
-			}
-			for (SeriesDefinition ss : schema.getEditedSeriesDefinitions()) {
-				int seriesNr = ss.getNumber();
-				if (schema.getSeriesDefinition(seriesNr, false) == null) {
-					createSchemaComponents(schema, ss, schema.getEditedAttributeDefinitions(seriesNr));
-					done = true;
-				} else {
-					for (Integer attribNr : schema.getDeletedAttributeDefinitions(seriesNr)) {
-						policy.willDelete(schema, ss, ss.getAttributeDefinition(attribNr, true));
-						deleteAttributeInSchema(schema, seriesNr, attribNr);
-						done = true;
-					}
-					for (AttributeDefinition<?> def : schema.getEditedAttributeDefinitions(seriesNr)) {
-						int attribNr = def.getNumber();
-						String description = attribNr == DatabaseBackend.MAGIC_NAME_NR ? ss.getDescription() : null;
-						if (ss.getAttributeDefinition(attribNr, false) == null) {
-							create(schema, seriesNr, description, def);
-						} else {
-							policy.willUpdate(schema, ss, def);
-							update(schema, seriesNr, description, def);
-						}
-						done = true;
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw T2DBMsg.exception(e, D.D30106, schema.getName());
-		}
-		return done;
-	}
-	
-	private void createSchemaComponents(UpdatableSchema schema, SeriesDefinition ss, Collection<AttributeDefinition<?>> editedDefs) throws T2DBException {
-		int seriesNr = ss.getNumber();
-		if (ss.isErasing()) {
-			AttributeDefinitionImpl<String> def = new AttributeDefinitionImpl<String>(DatabaseBackend.MAGIC_NAME_NR, null, null);
-			def.edit();
-			def.setErasing(true);
-			create(schema, seriesNr, null, def);
-		} else {
-			for (AttributeDefinition<?> def : editedDefs) {
-				create(schema, seriesNr, 
-					(def.getNumber() == DatabaseBackend.MAGIC_NAME_NR ? ss.getDescription() : null), def);
-			}
-		}
-	}
-
 	@Override
 	public Property<?> getProperty(String name, boolean mustExist) throws T2DBException {
 		Property<?> prop = getProperty(name);

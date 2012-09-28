@@ -19,19 +19,12 @@
  */
 package ch.agent.crnickl.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.T2DBMsg;
-import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.SchemaComponent;
 
 /**
@@ -45,60 +38,30 @@ import ch.agent.crnickl.api.SchemaComponent;
 public class SchemaComponents<T extends SchemaComponent> {
 
 	private Map<Integer, T> components;
+	private Map<Integer, T> editedComponents;
 	private Map<String, T> byName;
-	private T[] byNumber;
-	private int byNumberBase;
-	private Map<Integer, T> edited;
-	private Set<Integer> deleted;
-	private boolean editMode;
 	private int nameIndexThreshold;
-	private int numberIndexMaxRange; 
-	private T[] template;
 	
 	/**
 	 * Construct a managed collection of schema components. An easy way to
-	 * disable indexing is to pass negative performance tuning parameters.
+	 * disable indexing is to pass a negative performance tuning parameter.
 	 * 
 	 * @param components
 	 *            a collection of initial components to add
 	 * @param nameIndexThreshold
 	 *            if the number of components is larger than this threshold, a
 	 *            lookup index for searching by name is set up
-	 * @param numberIndexMaxRange
-	 *            if the range of component numbers is not larger than this
-	 *            parameter, a lookup array for searching by number is set up
-	 * @param template
-	 *            template for the lookup array for searching by number
 	 */
-	public SchemaComponents(Collection<T> components, int nameIndexThreshold, int numberIndexMaxRange, T[] template) {
+	public SchemaComponents(Collection<T> components, int nameIndexThreshold) {
 		this.components = new TreeMap<Integer, T>();
 		this.nameIndexThreshold = nameIndexThreshold;
-		this.numberIndexMaxRange = numberIndexMaxRange;
-		this.template = template;
 		
 		if (components != null) {
 			for (T component : components) {
 				this.components.put(component.getNumber(), component);
 			}
-			makeIndexes();
+			makeIndex();
 		}
-	}
-	
-	/**
-	 * Construct a managed collection of schema components with no indexing.
-	 * For a schema with only a few attributes or series, indexes are not useful.
-	 * 
-	 * @param components a collection of initial components to add 
-	 */
-	public SchemaComponents(Collection<T> components) {
-		this(components, -1, -1, null);
-	}
-
-	private void clearUpdates() {
-		if (edited != null)
-			edited.clear();
-		if (deleted != null)
-			deleted.clear();
 	}
 	
 	/**
@@ -107,7 +70,7 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * @return true if all components are ready and edit mode is not active
 	 */
 	public boolean isComplete() {
-		boolean ready = !editMode;
+		boolean ready = editedComponents == null;
 		if (ready) {
 			for (T compo : components.values()) {
 				if (!compo.isComplete()) {
@@ -129,21 +92,33 @@ public class SchemaComponents<T extends SchemaComponent> {
 	}
 
 	/**
-	 * Return all edited components. Components are sorted by number.
+	 * Return all components, modified (edited, deleted) or not modified. 
+	 * Components are sorted by number. If no component was modified, return null.
+	 * When no component was modified, use {@link #getComponents()}.
 	 * 
-	 * @return all edited components
+	 * @return all edited components or null
 	 */
 	public Collection<T> getEditedComponents() {
-		return edited == null ? new ArrayList<T>() : edited.values();
+		unEdit();
+		return editedComponents == null ? null : editedComponents.values();
 	}
 	
 	/**
-	 * Return the set of deleted component numbers.
+	 * Return the components as a map. If the <code>edited</code>
+	 * flag is set, the edited map is returned, else the original map.
+	 * The edited map includes components which have been modified and components which
+	 * have not been modified. Components deleted are recognized by their absence.
+	 * When nothing at all was modified, the result is null.
 	 * 
-	 * @return the set of deleted component numbers
+	 * @param edited if true return the edited map, else the original
+	 * @return a map or null when the edited was requested but nothing was modified
 	 */
-	public Set<Integer> getDeletedComponents() {
-		return deleted == null ? new HashSet<Integer>() : deleted;
+	public Map<Integer, T> getMap(boolean edited) {
+		if (edited) {
+			unEdit();
+			return editedComponents;
+		} else
+			return components;
 	}
 	
 	/**
@@ -154,14 +129,7 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * @return the component with the given number
 	 */
 	public T getComponent(int number) {
-		T component = null;
-		if (byNumber != null) {
-			int i = number - byNumberBase;
-			if (i >= 0 && i < byNumber.length)
-				 component = byNumber[i];
-		} else
-			component = components.get(number);
-		return component;
+		return components.get(number);
 	}
 	
 	/**
@@ -187,33 +155,25 @@ public class SchemaComponents<T extends SchemaComponent> {
 
 	/**
 	 * Enter edit mode and edit the component specified.
-	 * Return the component with the given number. Return null if not
-	 * found. The component is put on a list of edited components and its edit mode is set.
-	 * If the component was on the list of deleted components, it is removed from that list.
+	 * Return the component with the given number or null if not
+	 * found. If the component is not null, its edit mode is set.
 	 * 
 	 * @param number a positive number
-	 * @return a component
+	 * @return a component or null
 	 * @throws T2DBException
 	 */
-	public T edit(int number) {
+	public T editComponent(int number) {
 		edit();
-		deleted.remove(number);
-		T component = edited.get(number);
-		if (component == null) {
-			component = getComponent(number);
-			if (component != null) {
-				component.edit();
-				edited.put(number, component);
-			}
-		}
+		T component = editedComponents.get(number);
+		if (component != null)
+			component.edit();
 		return component;
 	}
  	
 	/**
-	 * Add a new component. Return false if there is already a component with the
-	 * same number. Put the new component on the list of edited components. If
-	 * the component was on the list of deleted components, it is removed from
-	 * that list.
+	 * Add a new component. If there is no component with the same number, set
+	 * its edit mode and add it to the collection of components and return true.
+	 * Else do nothing and return false.
 	 * 
 	 * @param component
 	 *            a component
@@ -224,50 +184,45 @@ public class SchemaComponents<T extends SchemaComponent> {
 		boolean added = false;
 		edit();
 		Integer number = component.getNumber();
-		if (getComponent(number) == null) {
-			if (edited.get(number) == null) {
-				deleted.remove(number);
-				component.edit();
-				edited.put(number, component);
-				added = true;
-			}
-		} 
+		if (editedComponents.get(number) == null) {
+			component.edit();
+			editedComponents.put(number, component);
+			added = true;
+		}
 		return added;
 	}
 
 	/**
-	 * If the component is found on the list of edited components, remove it and return true.
-	 * If the component is found in this collection, put it on the list of 
-	 * deleted components and return true.
-	 * If the component is not found return false.  
+	 * If a component with the given number exists remove it and return true.
+	 * Else return false.
 	 * 
 	 * @param number a positive number
 	 * @return true unless the component was not found
 	 */
 	public boolean deleteComponent(int number) {
 		edit();
-		boolean done = false;
-		if (edited.remove(number) != null)
-			done = true;
-		else {
-			if (getComponent(number) != null) {
-				deleted.add(number);
-				done = true;
-			}
-		}
-		return done;
+		return editedComponents.remove(number) != null;
 	}
 	
 	/**
-	 * Enter edit mode. Indexes are eliminated.
+	 * Enter edit mode. The index is discarded.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void edit() {
-		if (!editMode) {
-			editMode = true;
-			edited = new TreeMap<Integer, T>();
-			deleted = new TreeSet<Integer>();
+		if (editedComponents == null) {
+			// CAUTION, deep copy required
+			editedComponents = new HashMap<Integer, T>();
+			for (Integer key : components.keySet()) {
+				editedComponents.put(key, (T) components.get(key).copy());
+			}
 			byName = null;
-			byNumber = null;
+		}
+	}
+	
+	private void unEdit() {
+		if (components.equals(editedComponents)) {
+			editedComponents = null;
+			makeIndex();
 		}
 	}
 	
@@ -286,57 +241,14 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * </ul>
 	 */
 	public void consolidate() throws T2DBException {
-		if (editMode) {
-			for (Integer index : deleted) {
-				components.remove(index);
-			}
-			for (Map.Entry<Integer, T> e : edited.entrySet()) {
-				if (components.containsKey(e.getKey())) {
-					components.get(e.getKey()).edit(e.getValue());
-				} else {
-					e.getValue().consolidate();
-					components.put(e.getKey(), e.getValue());
-				}
-			}
-			clearUpdates();
-			editMode = false;
-			checkUniqueNames(components.values());
-			makeIndexes();
+		if (editedComponents != null) {
+			components = new TreeMap<Integer, T>(editedComponents);
+			editedComponents = null;
+			makeIndex();
 		}
 	}
 	
-	private void checkUniqueNames(Collection<T> components) throws T2DBException {
-		Set<String> names = new HashSet<String>(components.size());
-		for (T compo : components) {
-			if (!names.add(compo.getName()))
-				throw T2DBMsg.exception(D.D30130, compo.getName());
-		}
-	}
-	
-	private void makeNumberIndex(Collection<T> components, int maxRange, T[] template) {
-		byNumber = null;
-		if (maxRange > -1) {
-			int min = Integer.MAX_VALUE;
-			int max = Integer.MIN_VALUE;
-			for (T component : components) {
-				min = Math.min(min, component.getNumber());
-				max = Math.max(max, component.getNumber());
-			}
-			int range = max - min + 1;
-			if (range <= maxRange) {
-				byNumberBase = min;
-				List<T> list = new ArrayList<T>(range);
-				for (int i = 0; i < range; i++)
-					list.add(null);
-				for (T component : components) {
-					list.set(component.getNumber() - byNumberBase, component);
-				}
-				byNumber = list.toArray(template);
-			}
-		}
-	}
-	
-	private void makeNameIndex(Collection<T> components, int threshold) {
+	private void makeIndex(Collection<T> components, int threshold) {
 		byName = null;
 		if (threshold > -1) {
 			if (components.size() > threshold && isComplete()) {
@@ -351,9 +263,8 @@ public class SchemaComponents<T extends SchemaComponent> {
 		}
 	}
 	
-	private void makeIndexes() {
-		makeNameIndex(components.values(), nameIndexThreshold);
-		makeNumberIndex(components.values(), numberIndexMaxRange, template);
+	private void makeIndex() {
+		makeIndex(components.values(), nameIndexThreshold);
 	}
 
 	@Override

@@ -20,9 +20,9 @@
 package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.api.AttributeDefinition;
-import ch.agent.crnickl.api.SeriesDefinition;
+import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.UpdatableSchema;
+import ch.agent.crnickl.api.ValueType;
 
 /**
  * A SchemaUpdatePolicy supports the delegation of various decisions and
@@ -50,50 +50,28 @@ public interface SchemaUpdatePolicy {
 	void willDelete(UpdatableSchema schema) throws T2DBException;
 	
 	/**
-	 * Throw an exception if the attribute in the schema cannot be deleted.
+	 * Throw an exception if the property cannot be rejected.
 	 * 
-	 * @param schema a schema
-	 * @param def an attribute definition
+	 * @param property a property
 	 * @throws T2DBException
 	 */
-	void willDelete(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException;
+	<T>void willDelete(Property<T> property) throws T2DBException;
 	
 	/**
-	 * Throw an exception if the update of the attribute in the schema is rejected.
+	 * Throw an exception if the the value type cannot be deleted.
 	 * 
-	 * @param schema a schema
-	 * @param def an attribute definition
+	 * @param valueType a value type
 	 * @throws T2DBException
 	 */
-	void willUpdate(UpdatableSchema schema, AttributeDefinition<?> def) throws T2DBException;
-	
+	<T>void willDelete(ValueType<T> valueType) throws T2DBException;
+
 	/**
-	 * Throw an exception if the series in the schema cannot be deleted.
+	 * Throw an exception if the value type value cannot be deleted.
 	 * 
-	 * @param schema a schema
-	 * @param ss a series definition
+	 * @param valueType  a value type
+	 * @param value a value
 	 * @throws T2DBException
 	 */
-	void willDelete(UpdatableSchema schema, SeriesDefinition ss) throws T2DBException;
-	
-	/**
-	 * Throw an exception if the series attribute in the schema cannot be deleted.
-	 * 
-	 * @param schema a schema
-	 * @param ss a series definition
-	 * @param def an attribute definition
-	 * @throws T2DBException
-	 */
-	void willDelete(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException;
-	
-	/**
-	 * Throw an exception if the update of the series attribute in the schema is rejected.
-	 * 
-	 * @param schema a schema
-	 * @param ss a series definition
-	 * @param def an attribute definition
-	 * @throws T2DBException
-	 */
-	void willUpdate(UpdatableSchema schema, SeriesDefinition ss, AttributeDefinition<?> def) throws T2DBException;
-	
+	<T>void willDelete(ValueType<T> valueType, T value) throws T2DBException;
+
 }

@@ -75,4 +75,11 @@ public interface SchemaComponent {
 	 * @throws T2DBException
 	 */
 	void consolidate() throws T2DBException;
+	
+	/**
+	 * Return a copy.
+	 * 
+	 * @return a copy
+	 */
+	SchemaComponent copy();
 }

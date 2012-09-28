@@ -58,7 +58,7 @@ public class SeriesDefinitionImpl implements SeriesDefinition {
 			throw T2DBMsg.exception(D.D30117);
 		this.number = number;
 		this.description = description;
-		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs, 3, 30, new AttributeDefinition<?>[0]);
+		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs, 3);
 	}
 	
 	@Override
@@ -203,6 +203,22 @@ public class SeriesDefinitionImpl implements SeriesDefinition {
 	@Override
 	public void consolidate() throws T2DBException {
 		attributes.consolidate();
+	}
+
+	@Override
+	public SchemaComponent copy() {
+		try {
+			Collection<AttributeDefinition<?>> components = new ArrayList<AttributeDefinition<?>>();
+			for (AttributeDefinition<?> compo : this.attributes.getComponents()) {
+				components.add((AttributeDefinition<?>)compo.copy());
+			}
+			SeriesDefinitionImpl sd = new SeriesDefinitionImpl(this.number, this.description, components);
+			sd.erasing = this.erasing;
+			// don't copy editMode
+			return sd;
+		} catch (T2DBException e) {
+			throw new RuntimeException("bug", e);
+		}
 	}
 
 	@Override

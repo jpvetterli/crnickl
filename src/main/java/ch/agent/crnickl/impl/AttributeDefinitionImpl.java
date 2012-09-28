@@ -35,14 +35,13 @@ import ch.agent.crnickl.api.SchemaComponent;
  * @param <T>
  *            the underlying data type of the attribute
  */
-public class AttributeDefinitionImpl<T> implements AttributeDefinition<T>, SchemaComponent {
+public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 
 	private boolean editMode;
 	private boolean erasing;
 	private int number;
 	private Property<T>  property;
 	private Object value;
-	private boolean valueSet; // when null
 	
 	/**
 	 * Construct an attribute definition.
@@ -153,17 +152,7 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T>, Schem
 	public void setValue(Object value) throws T2DBException {
 		checkEdit();
 		this.value = value;
-		this.valueSet = true;
 		checkType();
-	}
-	
-	/**
-	 * Test if a default value has been set.
-	 * 
-	 * @return true if a default value has been set.
-	 */
-	public boolean isValueSet() {
-		return valueSet;
 	}
 	
 	@Override
@@ -216,6 +205,19 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T>, Schem
 		}
 	}
 	
+	@Override
+	public SchemaComponent copy() {
+		try {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			AttributeDefinitionImpl<T> ad = new AttributeDefinitionImpl(this.number, this.property, this.value);
+			ad.erasing = this.erasing;
+			// don't copy editMode
+			return ad;
+		} catch (T2DBException e) {
+			throw new RuntimeException("bug", e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <S> AttributeDefinition<S> typeCheck(Class<S> type) throws T2DBException {
