@@ -565,7 +565,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(Property<?> property, Schema schemas) throws T2DBException;
+	Collection<Surrogate> findChronicles(Property<?> property, Schema schema) throws T2DBException;
 
 	/**
 	 * Return all chronicles with a series corresponding to the series definition 
