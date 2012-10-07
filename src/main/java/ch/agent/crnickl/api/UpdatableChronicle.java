@@ -103,13 +103,18 @@ public interface UpdatableChronicle extends Chronicle, Updatable {
 	<T>UpdatableSeries<T> updateSeries(String name) throws T2DBException;
 
 	/**
-	 * Return a new chronicle to be created in this chronicle. The name must not
-	 * be in use. The name may optionally be tweaked to satisfy this requirement
-	 * (and to obey rules of the prevailing name syntax). The attributes must be
-	 * defined in the schema. If no schema is specified, the schema of this
-	 * chronicle will apply. If this chronicle has no schema, then the first
-	 * schema along the chronicle chain will apply. On the other hand, if a
-	 * schema is specified, it completely overrides any current schema.
+	 * Return a new chronicle to be created in this chronicle. When setting up a
+	 * hierarchy of chronicles, start with {@link Database#getTopChronicle()}.
+	 * <p>
+	 * The name of the chronicle must not be in use within this chronicle. It
+	 * may optionally be tweaked to satisfy this requirement (and to obey rules
+	 * of the prevailing name syntax). The attributes must be defined in the
+	 * schema. If no schema is specified, the schema of this chronicle will
+	 * apply. If this chronicle has no schema, then the first schema along the
+	 * chronicle chain will apply. On the other hand, if a schema is specified,
+	 * it completely overrides any current schema. The schema may not be an
+	 * {@link UpdatableSchema}.
+	 * <p>
 	 * The client must execute {@link Updatable#applyUpdates()} on the result.
 	 * 
 	 * @param name

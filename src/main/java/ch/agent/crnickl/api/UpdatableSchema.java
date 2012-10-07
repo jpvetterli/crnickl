@@ -55,9 +55,10 @@ public interface UpdatableSchema extends Schema, Updatable {
 	void destroy() throws T2DBException;
 	
 	/**
-	 * Resolve into a schema. Resolving an updatable schema
-	 * resolves its base schema recursively, then adds, edits, and deletes
-	 * attributes and series as specified in the updatable schema.
+	 * Resolve into a schema. Resolving an updatable schema resolves its base
+	 * schema recursively, then adds, edits, and deletes attributes and series
+	 * as specified in this updatable schema. Once resolved, the schema must be
+	 * complete as determined by {@link Schema#isComplete()}.
 	 * 
 	 * @return a schema
 	 * @throws T2DBException

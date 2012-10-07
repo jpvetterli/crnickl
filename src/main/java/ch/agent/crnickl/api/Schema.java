@@ -31,8 +31,10 @@ import ch.agent.crnickl.T2DBException;
  * of {@link Series}. Series can themselves have attributes, as defined
  * in their {@link SeriesDefinition}.
  * <p>
- * A schema can extend and override elements of another schema. Because of this,
- * schemas form a tree structure (more precisely a forest).
+ * A schema can extend, override, or erase elements of another schema. Because of this,
+ * schemas form a tree structure (more precisely a forest). The base 
+ * schema, if any, is only accessible from the {@link UpdatableSchema},
+ * which can be obtained with the {@link #edit()} method.
  * 
  * @author Jean-Paul Vetterli
  * @version 1.0.0
@@ -42,7 +44,7 @@ public interface Schema extends IncompleteSchema, DBObject {
 	/**
 	 * Return true if the schema is complete. A schema is complete if all its
 	 * components are complete. When a schema is complete it can be used in a
-	 * chronicle.
+	 * chronicle. See also {@link SchemaComponent#isComplete()}.
 	 * 
 	 * @return true if the schema is complete
 	 */
@@ -51,7 +53,7 @@ public interface Schema extends IncompleteSchema, DBObject {
 	/**
 	 * Return an {@link UpdatableSchema} corresponding to this schema. 
 	 * Successfully getting an {@link Updatable} object does not imply
-	 * that updates can be successfully applied.
+	 * that any update can be successfully applied.
 	 * 
 	 * @return an updatable schema corresponding to this schema
 	 */
