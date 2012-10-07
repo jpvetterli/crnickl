@@ -75,18 +75,14 @@ public class AttributeImpl<T> implements Attribute<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void scan(Object value) throws T2DBException {
-		if (value == null)
-			set(null);
+		ValueType<T> vt = definition.getProperty().getValueType();
+		if (vt.isCompatible(value))
+			set((T) value);
 		else {
-			ValueType<T> vt = definition.getProperty().getValueType();
-			if (vt.isCompatible(value))
-				set((T) value);
-			else {
-				if (value instanceof String)
-					set(vt.scan((String) value));
-				else
-					throw T2DBMsg.exception(D.D10114, value, vt.getType().getName());
-			}
+			if (value instanceof String)
+				set(vt.scan((String) value));
+			else
+				throw T2DBMsg.exception(D.D10114, value, vt.getType().getName());
 		}
 	}
 

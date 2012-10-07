@@ -525,7 +525,7 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 
 	@Override
 	public boolean isCompatible(Object obj) {
-		return getType().isInstance(obj);
+		return obj == null || getType().isInstance(obj);
 	}
 
 	@Override

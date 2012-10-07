@@ -208,7 +208,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 	@Override
 	public void scanValue(TimeIndex t, Object value) throws T2Exception, T2DBException {
 		ValueType<T> vt = getValueType();
-		if (value == null || vt.isCompatible(value))
+		if (vt.isCompatible(value))
 			setValue(t, (T) value);
 		else {
 			if (value instanceof String)
