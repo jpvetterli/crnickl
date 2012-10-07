@@ -37,9 +37,8 @@ import ch.agent.t2.time.TimeDomain;
  * @author Jean-Paul Vetterli
  * @version 1.0.0
  */
-public class SeriesDefinitionImpl implements SeriesDefinition {
+public class SeriesDefinitionImpl extends SchemaComponentImpl implements SeriesDefinition {
 
-	private boolean editMode;
 	private boolean erasing;
 	private int number;
 	private String description;
@@ -54,22 +53,31 @@ public class SeriesDefinitionImpl implements SeriesDefinition {
 	 * @throws T2DBException
 	 */
 	public SeriesDefinitionImpl(int number,	String description, Collection<AttributeDefinition<?>> attributeDefs) throws T2DBException {
+		super();
 		if (number < 1)
 			throw T2DBMsg.exception(D.D30117);
 		this.number = number;
 		this.description = description;
-		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs, 3);
+		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs);
 	}
 	
 	@Override
+	public void setContainer(SchemaComponentContainer container) {
+		this.attributes.setContainer(container);
+	}
+
+	@Override
 	public boolean isComplete() {
-		return !erasing 
+		return !isErasing() 
 			&& getName() != null && getValueType() != null && getTimeDomain() != null 
 			&& attributes.isComplete();
 	}
 
 	@Override
 	public boolean isErasing() {
+		// make sure it is still erasing
+		if (erasing)
+			erasing = description == null && attributes.getMap().size() == 0;
 		return erasing;
 	}
 
@@ -145,14 +153,28 @@ public class SeriesDefinitionImpl implements SeriesDefinition {
 
 	/**
 	 * Set the erasing mode.
+	 * Setting erasing mode resets the description and all attributes.
 	 * 
 	 * @param erasing true if the definition should erase an inherited definition
 	 */
 	public void setErasing(boolean erasing) {
 		checkEdit();
-		this.erasing = erasing;
+		doSetErasing(erasing);
 	}
 	
+	private void doSetErasing(boolean erasing) {
+		this.erasing = erasing;
+		if (erasing) {
+			this.description = null;
+			try {
+				this.attributes = new SchemaComponents<AttributeDefinition<?>>(
+						null);
+			} catch (T2DBException e) {
+				// never happens
+			}
+		}
+	}
+
 	/**
 	 * Set the description.
 	 * 
@@ -171,49 +193,35 @@ public class SeriesDefinitionImpl implements SeriesDefinition {
 	protected SchemaComponents<AttributeDefinition<?>> getAttributeDefinitionsObject() {
 		return attributes;
 	}
-	
-	@Override
-	public void edit() {
-		this.editMode = true;
-	}
-	
-	private void checkEdit() {
-		if (!editMode)
-			throw new IllegalStateException();
-	}
-	
 	@Override
 	public void edit(SchemaComponent component) throws T2DBException {
 		if (!(component instanceof SeriesDefinition))
 			throw new IllegalArgumentException(component == null ? null : component.getClass().getName());
 		SeriesDefinition arg = (SeriesDefinition) component;
 		if (arg.isErasing())
-			erasing = true;
+			doSetErasing(true);
 		else {
 			if (arg.getDescription() != null)
 				setDescription(arg.getDescription());
-			try {
-				attributes.consolidate();
-			} catch (T2DBException e) {
-				throw T2DBMsg.exception(e, D.D30131, getName(), component.getName());
-			}
+			attributes.consolidate();
 		}
-	}
-
-	@Override
-	public void consolidate() throws T2DBException {
-		attributes.consolidate();
 	}
 
 	@Override
 	public SchemaComponent copy() {
 		try {
-			Collection<AttributeDefinition<?>> components = new ArrayList<AttributeDefinition<?>>();
-			for (AttributeDefinition<?> compo : this.attributes.getComponents()) {
-				components.add((AttributeDefinition<?>)compo.copy());
+			SeriesDefinitionImpl sd = null;
+			if (isErasing()) {
+				sd = new SeriesDefinitionImpl(this.number, null, null);	
+				sd.setErasing(true);
+			} else {
+				Collection<AttributeDefinition<?>> components = new ArrayList<AttributeDefinition<?>>();
+				// deep copy
+				for (AttributeDefinition<?> compo : this.attributes.getComponents()) {
+					components.add((AttributeDefinition<?>) compo.copy());
+				}
+				sd = new SeriesDefinitionImpl(this.number, this.description, components);
 			}
-			SeriesDefinitionImpl sd = new SeriesDefinitionImpl(this.number, this.description, components);
-			sd.erasing = this.erasing;
 			// don't copy editMode
 			return sd;
 		} catch (T2DBException e) {

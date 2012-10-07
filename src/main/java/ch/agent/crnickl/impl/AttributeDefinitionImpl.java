@@ -35,23 +35,26 @@ import ch.agent.crnickl.api.SchemaComponent;
  * @param <T>
  *            the underlying data type of the attribute
  */
-public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
+public class AttributeDefinitionImpl<T> extends SchemaComponentImpl implements AttributeDefinition<T> {
 
-	private boolean editMode;
-	private boolean erasing;
+	private int seriesNr;
 	private int number;
 	private Property<T>  property;
 	private Object value;
+	private boolean erasing;
+	private boolean valueNullChecked;
 	
 	/**
 	 * Construct an attribute definition.
 	 * 
+	 * @param seriesNr the series number or zero if a chronicle attribute
 	 * @param number the attribute number
 	 * @param property a property
 	 * @param value a default value or null
 	 * @throws T2DBException
 	 */
-	public AttributeDefinitionImpl(int number, Property<T> property, T value) throws T2DBException {
+	public AttributeDefinitionImpl(int seriesNr, int number, Property<T> property, T value) throws T2DBException {
+		super();
 		if (number < 1)
 			throw T2DBMsg.exception(D.D30117);
 		this.number = number;
@@ -59,15 +62,36 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 		if (value != null)
 			getProperty().getValueType().check(value);
 		this.value = value;
+		this.seriesNr = seriesNr;
 	}
 	
 	@Override
 	public boolean isComplete() {
-		return !erasing && property != null;
+		boolean complete = false;
+		if (!isErasing()) {
+			if (property != null) {
+				/*
+				 * If the value is not null it has already been checked
+				 * else it has possibly never been set, so must ensure
+				 * null is valid.
+				 */
+				if (value == null && !valueNullChecked) {
+					try {
+						checkType(true);
+						complete = true;
+					} catch (T2DBException e) {
+						// complete remains false
+					}
+				} else
+					complete = true;
+			}
+		}
+		return complete;
 	}
 
 	@Override
 	public boolean isErasing() {
+		// unlike in SeriesDefinitionImpl, not lazy
 		return erasing;
 	}
 
@@ -117,47 +141,81 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 	/**
 	 * Set the erasing mode of the definition.
 	 * The definition must be in edit mode.
+	 * Setting erasing mode resets the property and the value.
 	 * 
 	 * @param erasing if true the definition removes an inherited definition
 	 */
 	public void setErasing(boolean erasing) {
 		checkEdit();
-		this.erasing = erasing;
+		doSetErasing(erasing);
 	}
+	
+	private void doSetErasing(boolean erasing) {
+		this.erasing = erasing;
+		if (erasing) {
+			this.property = null;
+			this.value = null;
+		}
+	} 
 
 	/**
 	 * Set the property.
 	 * The definition must be in edit mode.
+	 * The property name is also used as the attribute name.
+	 * Setting a non-null property resets erasing mode.
 	 * 
 	 * @param property a property or null
 	 * @throws T2DBException
 	 */
 	public void setProperty(Property<T> property) throws T2DBException {
+		String oldName = this.property == null ? null : this.property.getName();
 		checkEdit();
 		this.property = property;
 		try {
-			checkType();
+			checkType(valueNullChecked);
 		} catch (T2DBException e) {
 			throw T2DBMsg.exception(e, D.D30133, getValue(), getNumber(), property);
 		}
+		String newName = this.property == null ? null : this.property.getName();
+		try {
+			if (!same(oldName, newName))
+				nameChanged(true, oldName, newName);
+		} catch (T2DBException e) {
+			if (seriesNr == 0)
+				throw T2DBMsg.exception(e, D.D30151, getNumber());
+			else
+				throw T2DBMsg.exception(e, D.D30152, getNumber(), seriesNr);
+		}
+		if (property != null)
+			doSetErasing(false);
+		valueNullChecked = false;
 	}
 
 	/**
 	 * Set the default value.
 	 * The definition must be in edit mode.
+	 * Setting a non-null value resets erasing mode.
 	 * 
 	 * @param value a value or null
 	 * @throws T2DBException
 	 */
 	public void setValue(Object value) throws T2DBException {
-		checkEdit();
-		this.value = value;
-		checkType();
-	}
-	
-	@Override
-	public void edit() {
-		this.editMode = true;
+		Object old = this.value; int should_consider_null_value_stuff_when_testing_for_same;
+		if (!same(old, value)) {
+			checkEdit();
+			this.value = value;
+			checkType(true);
+			// is this value the name of the series ?
+			if (seriesNr > 0 && number == DatabaseBackend.MAGIC_NAME_NR) {
+				try {
+					nameChanged(false, (String) old, (String) value); 
+				} catch (T2DBException e) {
+					throw T2DBMsg.exception(e, D.D30153, seriesNr);
+				}
+			}
+		}
+		if (value != null)
+			doSetErasing(false);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -167,7 +225,7 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 			throw new IllegalArgumentException(component == null ? null : component.getClass().getName());
 		AttributeDefinition<?> arg = (AttributeDefinition<?>) component;
 		if (arg.isErasing())
-			erasing = true;
+			doSetErasing(true);
 		else {
 			if (arg.getProperty() != null)
 				property = (Property<T>) arg.getProperty();
@@ -176,25 +234,17 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 		}
 	}
 
-	@Override
-	public void consolidate() throws T2DBException {
-	}
-
-	private void checkEdit() {
-		if (!editMode)
-			throw new IllegalStateException();
-	}
-	
 	/**
 	 * If both property and default value are set verify that their types agree.
 	 * If necessary and possible convert the value. If property or value is null, 
 	 * do nothing.
 	 * 
+	 * @param alsoIfValueNull also check the type if the value is null
 	 * @throws T2DBException
 	 */
 	@SuppressWarnings("unchecked")
-	private void checkType() throws T2DBException {
-		if (this.property != null && this.value != null) {
+	private void checkType(boolean alsoIfValueNull) throws T2DBException {
+		if (this.property != null && (alsoIfValueNull || this.value != null)) {
 			if (!property.getValueType().isCompatible(value)) {
 				if (this.value instanceof String)
 					this.value = property.getValueType().scan((String)this.value);
@@ -202,6 +252,8 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 					throw T2DBMsg.exception(D.D30132, value, property, property.getValueType());
 			}
 			property.getValueType().check((T)value);
+			if (value == null)
+				valueNullChecked = true;
 		}
 	}
 	
@@ -209,9 +261,8 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 	public SchemaComponent copy() {
 		try {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			AttributeDefinitionImpl<T> ad = new AttributeDefinitionImpl(this.number, this.property, this.value);
-			ad.erasing = this.erasing;
-			// don't copy editMode
+			AttributeDefinitionImpl<T> ad = new AttributeDefinitionImpl(this.seriesNr, this.number, this.property, this.value);
+			ad.doSetErasing(isErasing());
 			return ad;
 		} catch (T2DBException e) {
 			throw new RuntimeException("bug", e);
@@ -229,7 +280,7 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (erasing ? 1231 : 1237);
+		result = prime * result + (isErasing() ? 1231 : 1237);
 		result = prime * result
 				+ ((property == null) ? 0 : property.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
@@ -245,7 +296,7 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 		if (getClass() != obj.getClass())
 			return false;
 		AttributeDefinitionImpl<?> other = (AttributeDefinitionImpl<?>) obj;
-		if (erasing != other.erasing)
+		if (isErasing() != other.isErasing())
 			return false;
 		if (property == null) {
 			if (other.property != null)
@@ -260,5 +311,8 @@ public class AttributeDefinitionImpl<T> implements AttributeDefinition<T> {
 		return true;
 	}
 	
+	private boolean same(Object x, Object y) {
+		return x == null ? y == null : x.equals(y);
+	}
 	
 }

@@ -37,6 +37,7 @@ import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableChronicle;
+import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableSeries;
 import ch.agent.crnickl.api.ValueType;
 
@@ -222,32 +223,38 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 	}
 
 	@Override
-	public UpdatableChronicle createChronicle(String orig, boolean tweakable, String description, Collection<Attribute<?>> attributes, Schema schema) throws T2DBException {
+	public UpdatableChronicle createChronicle(String orig, boolean tweakable,
+			String description, Collection<Attribute<?>> attributes,
+			Schema schema) throws T2DBException {
+		
 		if (getSurrogate().inConstruction() && !isTopChronicle())
 			throw T2DBMsg.exception(D.D40108, getName(true));
-		else {
-			String name = getDatabase().getNamingPolicy().checkSimpleName(orig, tweakable);
-			Chronicle current = getChronicle(name, false);
-			if (current != null) {
-				if (tweakable) {
-					name = findNextAvailableName(name, 2, 9);
-					if (name == null)
-						throw T2DBMsg.exception(D.D40127, name, getName(true));
-				} else
-					throw T2DBMsg.exception(D.D40126, name, getName(true));
-			}
-			UpdatableChronicleImpl ent = new UpdatableChronicleImpl(new SurrogateImpl(getDatabase(), DBObjectType.CHRONICLE, null));
-			ent.collection = this;
-			ent.name = name;
-			ent.description = description;
-			ent.schema = schema;
-			if (attributes != null) {
-				for (Attribute<?> attr : attributes) {
-					ent.setAttribute(attr);
-				}
-			}
-			return ent;
+		
+		if (schema instanceof UpdatableSchema)
+			throw T2DBMsg.exception(D.D40104, getName(true), schema.getName());
+		
+		String name = getDatabase().getNamingPolicy().checkSimpleName(orig,	tweakable);
+		Chronicle current = getChronicle(name, false);
+		if (current != null) {
+			if (tweakable) {
+				name = findNextAvailableName(name, 2, 9);
+				if (name == null)
+					throw T2DBMsg.exception(D.D40127, name, getName(true));
+			} else
+				throw T2DBMsg.exception(D.D40126, name, getName(true));
 		}
+		UpdatableChronicleImpl ent = new UpdatableChronicleImpl(
+				new SurrogateImpl(getDatabase(), DBObjectType.CHRONICLE, null));
+		ent.collection = this;
+		ent.name = name;
+		ent.description = description;
+		ent.schema = schema;
+		if (attributes != null) {
+			for (Attribute<?> attr : attributes) {
+				ent.setAttribute(attr);
+			}
+		}
+		return ent;
 	}
 	
 	private String findNextAvailableName(String orig, int start, int end) throws T2DBException {

@@ -76,7 +76,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	private ChronicleUpdatePolicy eup;
 	private NamingPolicy nm;
 	private boolean strictNameSpaceMode;
-	private int nameIndexThreshold;
 	private Map<String, ValueAccessMethods<?>> am;
 	
 	/**
@@ -210,13 +209,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 			throw T2DBMsg.exception(e, D.D00108, DatabaseBackend.DB_PARAM_Boolean_STRICT_NAME_SPACE, parameter);
 		}
 		
-		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_NAME_INDEX_THRESHOLD, false);
-		try {
-			nameIndexThreshold = parameter == null ? DB_PARAM_Int_NAME_INDEX_THRESHOLD_DEFAULT : new Integer(parameter);
-		} catch (Exception e) {
-			throw T2DBMsg.exception(e, D.D00108, DatabaseBackend.DB_PARAM_Int_NAME_INDEX_THRESHOLD, parameter);
-		}
-		
 		eupx = null;
 		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Class_ChronicleUpdatePolicyExtension, false);
 		try {
@@ -332,11 +324,6 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	@Override
 	public void check(Permission permission, Surrogate surrogate) throws T2DBException {
 		getPermissionChecker().check(permission, surrogate);
-	}
-
-	@Override
-	public int getNameIndexThreshold() {
-		return nameIndexThreshold;
 	}
 
 	private void validateNameSpace() throws T2DBException {

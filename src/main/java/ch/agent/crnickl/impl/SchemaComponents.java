@@ -25,61 +25,80 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.SchemaComponent;
 
 /**
  * SchemaComponents is a managed collection of {@link SchemaComponent} objects.
- * Components can be added, deleted, edited.
+ * Components can be added, deleted, edited. Components have a name, which can
+ * be modified in edit mode. Names, when not null, must be unique. Note that a 
+ * complete component has a non-null name. 
  * 
  * @author Jean-Paul Vetterli
  * @version 1.0.0
- * @param <T> the type of {@link SchemaComponent} managed by the collection
+ * @param <T>
+ *            the type of {@link SchemaComponent} managed by the collection
  */
-public class SchemaComponents<T extends SchemaComponent> {
+public class SchemaComponents<T extends SchemaComponent> implements SchemaComponentContainer, Containable {
 
 	private Map<Integer, T> components;
 	private Map<Integer, T> editedComponents;
 	private Map<String, T> byName;
-	private int nameIndexThreshold;
+	private SchemaComponentContainer container;
 	
 	/**
-	 * Construct a managed collection of schema components. An easy way to
-	 * disable indexing is to pass a negative performance tuning parameter.
+	 * Construct a managed collection of schema components. 
 	 * 
 	 * @param components
 	 *            a collection of initial components to add
-	 * @param nameIndexThreshold
-	 *            if the number of components is larger than this threshold, a
-	 *            lookup index for searching by name is set up
+	 * @throws T2DBException if components contain a duplicate name or number 
 	 */
-	public SchemaComponents(Collection<T> components, int nameIndexThreshold) {
+	public SchemaComponents(Collection<T> components) throws T2DBException {
 		this.components = new TreeMap<Integer, T>();
-		this.nameIndexThreshold = nameIndexThreshold;
-		
+		this.byName = new HashMap<String, T>();
+
 		if (components != null) {
 			for (T component : components) {
-				this.components.put(component.getNumber(), component);
+				if (this.components.put(component.getNumber(), component) != null)
+					throw T2DBMsg.exception(D.D30135, component.getNumber());
 			}
 			makeIndex();
 		}
 	}
 	
+	@Override
+	public void setContainer(SchemaComponentContainer container) {
+		this.container = container;
+	}
+
+	@Override
+	public void nameChanged(boolean  attribute, String oldName, String newName) throws T2DBException {
+		if (attribute) {
+			makeIndex(); // kiss (updating schemas is not on the critical path)
+		} else {
+			if (container != null)
+				container.nameChanged(false, oldName, newName);
+			else
+				makeIndex(); // kiss
+		}
+	}
+
 	/**
-	 * Return true if all components are ready and if edit mode is not active.
+	 * Return true if all components are complete.
 	 * 
-	 * @return true if all components are ready and edit mode is not active
+	 * @return true if all components are complete
 	 */
 	public boolean isComplete() {
-		boolean ready = editedComponents == null;
-		if (ready) {
-			for (T compo : components.values()) {
-				if (!compo.isComplete()) {
-					ready = false;
-					break;
-				}
+		boolean complete = true;
+		for (T compo : getMap().values()) {
+			if (!compo.isComplete()) {
+				complete = false;
+				break;
 			}
 		}
-		return ready;
+		assert (!complete || getMap().size() == byName.size());
+		return complete;
 	}
 
 	/**
@@ -88,37 +107,11 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * @return the collection of components
 	 */
 	public Collection<T> getComponents() {
-		return components.values();
-	}
-
-	/**
-	 * Return all components, modified (edited, deleted) or not modified. 
-	 * Components are sorted by number. If no component was modified, return null.
-	 * When no component was modified, use {@link #getComponents()}.
-	 * 
-	 * @return all edited components or null
-	 */
-	public Collection<T> getEditedComponents() {
-		unEdit();
-		return editedComponents == null ? null : editedComponents.values();
+		return getMap().values();
 	}
 	
-	/**
-	 * Return the components as a map. If the <code>edited</code>
-	 * flag is set, the edited map is returned, else the original map.
-	 * The edited map includes components which have been modified and components which
-	 * have not been modified. Components deleted are recognized by their absence.
-	 * When nothing at all was modified, the result is null.
-	 * 
-	 * @param edited if true return the edited map, else the original
-	 * @return a map or null when the edited was requested but nothing was modified
-	 */
-	public Map<Integer, T> getMap(boolean edited) {
-		if (edited) {
-			unEdit();
-			return editedComponents;
-		} else
-			return components;
+	protected Map<Integer, T> getMap() {
+		return editedComponents == null ? components : editedComponents;
 	}
 	
 	/**
@@ -129,7 +122,7 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * @return the component with the given number
 	 */
 	public T getComponent(int number) {
-		return components.get(number);
+		return getMap().get(number);
 	}
 	
 	/**
@@ -140,17 +133,7 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 * @return the component with the given name
 	 */
 	public T getComponent(String name) {
-		T component = null;
-		if (byName == null) {
-			for (T c : components.values()) {
-				if (c.getName().equals(name)) {
-					component = c;
-					break;
-				}
-			}
-		} else
-			component = byName.get(name);
-		return component;
+		return name == null ? null : byName.get(name);
 	}
 
 	/**
@@ -185,8 +168,14 @@ public class SchemaComponents<T extends SchemaComponent> {
 		edit();
 		Integer number = component.getNumber();
 		if (editedComponents.get(number) == null) {
+			String name = component.getName();
+			if (getComponent(name) != null)
+				throw T2DBMsg.exception(D.D30130, name);
+			byName.put(name, component);
 			component.edit();
 			editedComponents.put(number, component);
+			if (component instanceof Containable)
+				((Containable) component).setContainer(this);
 			added = true;
 		}
 		return added;
@@ -201,7 +190,15 @@ public class SchemaComponents<T extends SchemaComponent> {
 	 */
 	public boolean deleteComponent(int number) {
 		edit();
-		return editedComponents.remove(number) != null;
+		T component = editedComponents.remove(number);
+		if (component != null) {
+			String name = component.getName();
+			if (name != null)
+				byName.remove(name);
+			if (component instanceof Containable)
+				((Containable) component).setContainer(null);
+		}
+		return component != null;
 	}
 	
 	/**
@@ -210,66 +207,45 @@ public class SchemaComponents<T extends SchemaComponent> {
 	@SuppressWarnings("unchecked")
 	protected void edit() {
 		if (editedComponents == null) {
-			// CAUTION, deep copy required
 			editedComponents = new HashMap<Integer, T>();
 			for (Integer key : components.keySet()) {
-				editedComponents.put(key, (T) components.get(key).copy());
+				// IMPORTANT: deep copy
+				T component = (T) components.get(key).copy();
+				if (component instanceof Containable)
+					((Containable) component).setContainer(this);
+				editedComponents.put(key, component);
 			}
-			byName = null;
-		}
-	}
-	
-	private void unEdit() {
-		if (components.equals(editedComponents)) {
-			editedComponents = null;
-			makeIndex();
 		}
 	}
 	
 	/**
-	 * If edit mode is active, consolidate updates into components.
-	 * Consolidating means:
-	 * <ul>
-	 * <li>removing components from this collection
-	 * if they are on the list of deleted components,
-	 * <li>adding or editing components
-	 * which are in the list of edited components,
-	 * <li>checking that component names are unique,
-	 * <li>clearing the lists of edited and deleted components,
-	 * <li>making indexes, and
-	 * <li>exiting edit mode.
-	 * </ul>
+	 * Leave edit mode.
 	 */
-	public void consolidate() throws T2DBException {
+	public void consolidate() {
 		if (editedComponents != null) {
-			components = new TreeMap<Integer, T>(editedComponents);
+			components = editedComponents;
+			for (T component : components.values()) {
+				if (component instanceof Containable)
+					((Containable) component).setContainer(null);
+			}
 			editedComponents = null;
-			makeIndex();
 		}
 	}
-	
-	private void makeIndex(Collection<T> components, int threshold) {
-		byName = null;
-		if (threshold > -1) {
-			if (components.size() > threshold && isComplete()) {
-				byName = new HashMap<String, T>(components.size());
-				for (T component : components) {
-					String name = component.getName();
-					if (name == null) // isComplete violation ??
-						throw new IllegalArgumentException("bug: "+ component.getNumber());
-					byName.put(name, component);
-				}
+
+	private void makeIndex() throws T2DBException {
+		byName.clear();
+		for (T component : getMap().values()) {
+			String name = component.getName();
+			if (name != null) {
+				if (byName.put(name, component) != null)
+					throw T2DBMsg.exception(D.D30130, name);
 			}
 		}
 	}
 	
-	private void makeIndex() {
-		makeIndex(components.values(), nameIndexThreshold);
-	}
-
 	@Override
 	public String toString() {
 		return components.values().toString();
 	}
-
+	
 }

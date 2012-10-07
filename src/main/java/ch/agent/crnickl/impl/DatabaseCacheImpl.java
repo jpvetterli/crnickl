@@ -306,7 +306,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 			SchemaRefCounter ref = schemaCache.get(id);
 			if (ref == null) {
 				try {
-					Collection<AttributeDefinition<?>> defCopies = ref1(schema.getAttributeDefinitions());
+					Collection<AttributeDefinition<?>> defCopies = ref1(0, schema.getAttributeDefinitions());
 					Collection<SeriesDefinition> ssCopies = ref2(schema.getSeriesDefinitions());
 					esh = new SchemaImpl(schema.getName(), defCopies, ssCopies, schema.getSurrogate(), schema.getDependencyList());
 				} catch (T2DBException e) {
@@ -321,12 +321,12 @@ public class DatabaseCacheImpl implements DatabaseCache {
 		return esh;
 	}
 
-	private Collection<AttributeDefinition<?>> ref1(Collection<AttributeDefinition<?>> defs) throws T2DBException {
+	private Collection<AttributeDefinition<?>> ref1(int seriesNr, Collection<AttributeDefinition<?>> defs) throws T2DBException {
 		List<AttributeDefinition<?>> defCopies = new ArrayList<AttributeDefinition<?>>();
 		for (AttributeDefinition<?> def : defs) {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			AttributeDefinition<?> defCopy = 
-				new AttributeDefinitionImpl(def.getNumber(), ref(def.getProperty()), def.getValue());
+				new AttributeDefinitionImpl(seriesNr, def.getNumber(), ref(def.getProperty()), def.getValue());
 			defCopies.add(defCopy);
 		}
 		return defCopies;
@@ -335,7 +335,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	private Collection<SeriesDefinition> ref2(Collection<SeriesDefinition> sss) throws T2DBException {
 		List<SeriesDefinition> ssCopies = new ArrayList<SeriesDefinition>();
 		for (SeriesDefinition ss : sss) {
-			Collection<AttributeDefinition<?>> defCopies = ref1(ss.getAttributeDefinitions());
+			Collection<AttributeDefinition<?>> defCopies = ref1(ss.getNumber(), ss.getAttributeDefinitions());
 			SeriesDefinition ssCopy = new SeriesDefinitionImpl(ss.getNumber(), ss.getDescription(), defCopies);
 			ssCopies.add(ssCopy);
 		}

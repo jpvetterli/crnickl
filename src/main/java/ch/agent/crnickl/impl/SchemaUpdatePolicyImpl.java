@@ -55,8 +55,11 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 					policy.willDeleteOrErase(schema, original);
 				// deleting an erasing series is like adding the series
 			} else {
-				if (def.isErasing() && (original == null || !original.isErasing())) {
-					policy.willDeleteOrErase(schema, def);
+				if (def.isErasing()) {
+					if (original == null || !original.isErasing())
+						policy.willDeleteOrErase(schema, def);
+				} else {
+					// schema should have been resolved so don't check for completeness
 				}
 			}
 		}
@@ -76,20 +79,14 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 					if (def != null)
 						policy.willDeleteOrErase(schema, seriesDef, def);
 				} else {
-					Property<?> prop = attrDef.getProperty();
-					if (prop == null || prop.inConstruction())
-						throw T2DBMsg.exception(D.D30134, attrDef.getNumber());
+					// schema should have been resolved so don't check for completeness
 					if (origAttrDef != null)
 						policy.willUpdate(schema, seriesDef, attrDef);
-				
-//					a new attr must have a property, not "in construction"
-//					how about updates of attr defs?
 				}
 			}
 		}
 	}
 
-	
 	private DatabaseBackend database;
 	private UpdatableSchemaVisitor visitor;
 
@@ -137,68 +134,11 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	 * additional series, and additional series attributes.
 	 */
 	@Override
-	public void willUpdate(UpdatableSchema s) throws T2DBException {
+	public void willUpdate(UpdatableSchema schema) throws T2DBException {
 		try {
-			UpdatableSchemaImpl schema = (UpdatableSchemaImpl) s;
-			UpdatableSchema base = schema.getBase();
-			UpdatableSchema previousBase = schema.getPreviousBase();
-			boolean baseEdited = false;
-			if (base != null)
-				baseEdited = !base.equals(previousBase);
-			else if (previousBase != null)
-				baseEdited = true;
-			if (baseEdited) {
-				if (schema.edited())
-					throw T2DBMsg.exception(D.D30139, schema.getName());
-				willUpdateBase(schema);
-			}
-			// go through all the details of the schema
-			schema.visit(visitor);
+			((UpdatableSchemaImpl) schema).traverse(true, visitor);
 		} catch (T2DBException e) {
-			throw T2DBMsg.exception(e, D.D30105, s.getName());
-		}
-	}
-
-	/**
-	 * Invoke only when base and edited base differ.
-	 */
-	private void willUpdateBase(UpdatableSchema s) throws T2DBException {
-		UpdatableSchemaImpl schema = (UpdatableSchemaImpl) s;
-		String baseSchemaName = schema.getBase() == null ? null : schema.getBase().getName();
-		UpdatableSchemaImpl currentUES = new UpdatableSchemaImpl(schema.getName(), 
-				schema.getPreviousBase(), schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), 
-				schema.getSurrogate());
-		UpdatableSchemaImpl editedUES = new UpdatableSchemaImpl(schema.getName(), 
-				schema.getBase(), schema.getAttributeDefinitions(), schema.getSeriesDefinitions(), 
-				schema.getSurrogate());
-		
-		Schema current = null;
-		try {
-			current = currentUES.resolve();
-		} catch (T2DBException e) {
-			// If exception caused by cycle, let pass, so user can repair.
-			if (!e.getMsg().getKey().equals(D.D30110))
-				throw e;
-		}
-		// Hint: for testing broken schemas, let pass resolution exception on edited.
-		Schema edited = editedUES.resolve();
-		
-		if (current != null) {
-			if (current.getAttributeDefinitions().size() > edited.getAttributeDefinitions().size())
-				throw T2DBMsg.exception(D.D30142, baseSchemaName);
-			if (current.getSeriesDefinitions().size() > edited.getSeriesDefinitions().size())
-				throw T2DBMsg.exception(D.D30143, baseSchemaName);
-			for (AttributeDefinition<?> def : current.getAttributeDefinitions()) {
-				if (!def.equals(edited.getAttributeDefinition(def.getNumber(), false)))
-					throw T2DBMsg.exception(D.D30144, baseSchemaName, def.getNumber());
-			}
-			for (SeriesDefinition ss : current.getSeriesDefinitions()) {
-				for (AttributeDefinition<?> def : current.getAttributeDefinitions()) {
-					if (!def.equals(edited.getAttributeDefinition(def.getNumber(), false)))
-						throw T2DBMsg.exception(D.D30145, baseSchemaName,
-								def.getNumber(), ss.getNumber());
-				}
-			}
+			throw T2DBMsg.exception(e, D.D30105, schema.getName());
 		}
 	}
 

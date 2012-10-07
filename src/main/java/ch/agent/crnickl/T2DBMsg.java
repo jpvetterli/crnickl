@@ -85,6 +85,9 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D30108 = "D30108";
 		public static final String D30109 = "D30109";
 		public static final String D30110 = "D30110";
+		public static final String D30111 = "D30111";
+		public static final String D30112 = "D30112";
+		public static final String D30113 = "D30113";
 		public static final String D30114 = "D30114";
 		public static final String D30115 = "D30115";
 		public static final String D30117 = "D30117";
@@ -99,14 +102,13 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D30126 = "D30126";
 		public static final String D30127 = "D30127";
 		public static final String D30128 = "D30128";
-		public static final String D30129 = "D30129";
 		public static final String D30130 = "D30130";
-		public static final String D30131 = "D30131";
 		public static final String D30132 = "D30132";
 		public static final String D30133 = "D30133";
-		public static final String D30134 = "D30134";
-		
-		public static final String D30139 = "D30139";
+		public static final String D30135 = "D30135";
+		public static final String D30136 = "D30136";
+		public static final String D30137 = "D30137";
+		public static final String D30138 = "D30138";
 		public static final String D30140 = "D30140";
 		public static final String D30141 = "D30141";
 		public static final String D30142 = "D30142";
@@ -118,10 +120,14 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D30148 = "D30148";
 		public static final String D30149 = "D30149";
 		public static final String D30150 = "D30150";
+		public static final String D30151 = "D30151";
+		public static final String D30152 = "D30152";
+		public static final String D30153 = "D30153";
 		
 		public static final String D40101 = "D40101";
 		public static final String D40102 = "D40102";
 		public static final String D40103 = "D40103";
+		public static final String D40104 = "D40104";
 		public static final String D40108 = "D40108";
 		public static final String D40107 = "D40107";
 		public static final String D40109 = "D40109";

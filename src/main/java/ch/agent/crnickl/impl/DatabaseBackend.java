@@ -81,12 +81,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final int MAX_MAGIC_NR = 9;
 
 	/** 
-	 * The name of the external parameter specifying the threshold for indexing names.
-	 * <p>
-	 * @see #getNameIndexThreshold()
-	 */
-	public static final String DB_PARAM_Int_NAME_INDEX_THRESHOLD = "dbNameIndexThreshold";
-	/** 
 	 * The name of the external parameter specifying the cache size. The actual cache size is often larger,
 	 * because after taking the load factor into account, the actual size must be a power of 2.
 	 * For example, a cache size of 96 with a load factor of 0.75, corresponds to 128, a power of 2;
@@ -112,10 +106,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 */
 	public static final String DB_PARAM_Class_PermissionChecker = "dbPermissionChecker";
 	/**
-	 * The default threshold for the name index.
-	 */
-	public static final int DB_PARAM_Int_NAME_INDEX_THRESHOLD_DEFAULT = 5;
-	/**
 	 * The default cache size.
 	 * <p>
 	 * 
@@ -129,15 +119,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * By default, the database name does not need to be prefixed to full names.
 	 */
 	public static final boolean DB_PARAM_Boolean_STRICT_NAME_SPACE_DEFAULT = false;
-
-	/**
-	 * Return the threshold above which <em>indexed</em> access by name to series and attributes 
-	 * will be supported. A negative number is interpreted as a request not to provide
-	 * indexed access.
-	 * 
-	 * @return the threshold above which to provide by-name indexing in schemas
-	 */
-	int getNameIndexThreshold();
 
 	/**
 	 * Test if strict name space mode has been configured. In strict name space mode, 

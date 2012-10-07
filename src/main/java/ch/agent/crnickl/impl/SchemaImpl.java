@@ -53,8 +53,9 @@ public class SchemaImpl extends DBObjectImpl implements Schema {
 	 * @param seriesDefinitions a collection of series definitions
 	 * @param surrogate a surrogate
 	 * @param dependencyList a list of surrogates
+	 * @throws T2DBException if there is a duplicate attribute or series name
 	 */
-	public SchemaImpl(String name, Collection<AttributeDefinition<?>> attributeDefs, Collection<SeriesDefinition> seriesDefinitions, Surrogate surrogate, List<Surrogate> dependencyList) {
+	public SchemaImpl(String name, Collection<AttributeDefinition<?>> attributeDefs, Collection<SeriesDefinition> seriesDefinitions, Surrogate surrogate, List<Surrogate> dependencyList) throws T2DBException {
 		this(false, name, attributeDefs, seriesDefinitions, surrogate, dependencyList);
 	}
 	
@@ -68,19 +69,16 @@ public class SchemaImpl extends DBObjectImpl implements Schema {
 	 * @param seriesDefinitions a collection of series definitions
 	 * @param surrogate a surrogate
 	 * @param dependencyList a list of surrogates
+	 * @throws T2DBException if there is a duplicate attribute or series name
 	 */
-	protected SchemaImpl(boolean updatable, String name, Collection<AttributeDefinition<?>> attributeDefs, Collection<SeriesDefinition> seriesDefinitions, Surrogate surrogate, List<Surrogate> dependencyList) {
+	protected SchemaImpl(boolean updatable, String name, Collection<AttributeDefinition<?>> attributeDefs, Collection<SeriesDefinition> seriesDefinitions, Surrogate surrogate, List<Surrogate> dependencyList) throws T2DBException {
 		super(surrogate);
 		this.updatable = updatable;
 		if (name == null)
 			throw new IllegalArgumentException("name null");
 		this.name = name;
-		DatabaseBackend database = ((SurrogateImpl) surrogate).getDatabase();
-		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs, 
-				database.getNameIndexThreshold());
-			
-		this.seriesDefinitions = new SchemaComponents<SeriesDefinition>(seriesDefinitions, 
-				database.getNameIndexThreshold());
+		this.attributes = new SchemaComponents<AttributeDefinition<?>>(attributeDefs);
+		this.seriesDefinitions = new SchemaComponents<SeriesDefinition>(seriesDefinitions);
 		this.dependencyList = dependencyList;
 	}
 	
@@ -101,7 +99,8 @@ public class SchemaImpl extends DBObjectImpl implements Schema {
 	
 	@Override
 	public boolean isComplete() {
-		return attributes.isComplete() && seriesDefinitions.getComponents().size() > 0 && seriesDefinitions.isComplete();
+		// note: this allows to define a chronicle with no series
+		return attributes.isComplete() && seriesDefinitions.isComplete();
 	}
 
 	@Override
