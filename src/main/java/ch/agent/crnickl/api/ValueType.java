@@ -172,13 +172,15 @@ public interface ValueType<T> extends DBObject {
 	T scan(String value) throws T2DBException;
 	
 	/**
-	 * Returns true if the object can be assigned to a variable of the underlying
-	 * data type. THis method is provided because the instanceof operator cannot be used with
-	 * generics. The method does not check if the value is allowed. Use
-	 * {@link #check} for that.
+	 * Returns true if the object can be assigned to a variable of the
+	 * underlying data type. The method is provided because the instanceof
+	 * operator cannot be used with generics. The method does not check if the
+	 * value is allowed. Use {@link #check} for that.
 	 * 
-	 * @param obj an object
-	 * @return true if the object can be assigned to a variable of the underlying data type
+	 * @param obj
+	 *            an object
+	 * @return true if the object can be assigned to a variable of the
+	 *         underlying data type
 	 */
 	boolean isCompatible(Object obj);
 
