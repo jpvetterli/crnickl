@@ -34,14 +34,6 @@ import ch.agent.t2.time.TimeDomain;
 public interface SeriesDefinition extends SchemaComponent, IncompleteSchema, Comparable<SeriesDefinition> {
 	
 	/**
-	 * Return true if the definition removes an inherited definition.
-	 * This method is only relevant in edit mode.
-	 * 
-	 * @return true if the definition removes an inherited definition
-	 */
-	boolean isErasing();
-	
-	/**
 	 * Return the description of the series.
 	 * 
 	 * @return the series description

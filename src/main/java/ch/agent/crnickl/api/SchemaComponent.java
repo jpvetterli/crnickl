@@ -48,15 +48,28 @@ public interface SchemaComponent {
 
 	/**
 	 * Return true if the component is complete and can be used. All the
-	 * components of a {@link Schema} defining an actual {@link Chronicle} are
-	 * complete.
+	 * components of a {@link Schema} defining an actual {@link Chronicle} must
+	 * be complete. If the component is an {@link AttributeDefinition}, it is
+	 * complete when the property of the attribute is defined and the default
+	 * value is valid. If the component is a {@link SeriesDefinition}, it is
+	 * complete when the name, the type, and the time domain of the series are
+	 * defined, and all the series attributes are complete.
 	 * 
 	 * @return true if the component can be used
 	 */
 	boolean isComplete();
 
 	/**
-	 * Put the component into the edit state. 
+	 * Return true if the definition removes an inherited definition.
+	 * This method is relevant during execution of 
+	 * {@link UpdatableSchema#resolve()}. 
+	 * 
+	 * @return true if the definition removes an inherited definition
+	 */
+	boolean isErasing();
+	
+	/**
+	 * Enter edit mode. 
 	 */
 	void edit();
 	
@@ -69,11 +82,10 @@ public interface SchemaComponent {
 	void edit(SchemaComponent component) throws T2DBException;
 	
 	/**
-	 * Consolidate the component during the construction of a schema.
-	 * This method is only relevant in edit mode.
-	 * 
-	 * @throws T2DBException
+	 * This method is not used any more and will be eliminated in a future
+	 * version.
 	 */
+	@Deprecated
 	void consolidate() throws T2DBException;
 	
 	/**

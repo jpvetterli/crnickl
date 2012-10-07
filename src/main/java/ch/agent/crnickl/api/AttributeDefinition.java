@@ -34,14 +34,6 @@ public interface AttributeDefinition<T> extends SchemaComponent,
 		Comparable<AttributeDefinition<T>> {
 
 	/**
-	 * Return true if the definition removes an inherited definition.
-	 * This method is only relevant in edit mode.
-	 * 
-	 * @return true if the definition removes an inherited definition
-	 */
-	boolean isErasing();
-
-	/**
 	 * Return the attribute's property.
 	 * 
 	 * @return the property of the attribute
