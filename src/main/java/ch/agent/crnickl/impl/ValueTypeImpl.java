@@ -451,11 +451,12 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 			try {
 				@SuppressWarnings("unchecked")
 				Class<ValueScanner<T>> scannerClass = (Class<ValueScanner<T>>) Class.forName(scannerClassOrKeyword);
-				Constructor<ValueScanner<T>> constructor = scannerClass.getConstructor(ValueType.class);
-				if (constructor == null)
-					scanner = scannerClass.newInstance();
-				else
+				try {
+					Constructor<ValueScanner<T>> constructor = scannerClass.getConstructor(ValueType.class);
 					scanner = constructor.newInstance(this);
+				} catch (NoSuchMethodException e) {
+					scanner = scannerClass.newInstance();
+				}
 			} catch (Exception e) {
 				throw T2DBMsg.exception(e, D.D10110, name, scannerClassOrKeyword);
 			}
