@@ -111,12 +111,7 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D30138 = "D30138";
 		public static final String D30140 = "D30140";
 		public static final String D30141 = "D30141";
-		public static final String D30142 = "D30142";
-		public static final String D30143 = "D30143";
-		public static final String D30144 = "D30144";
-		public static final String D30145 = "D30145";
 		public static final String D30146 = "D30146";
-		public static final String D30147 = "D30147";
 		public static final String D30148 = "D30148";
 		public static final String D30149 = "D30149";
 		public static final String D30150 = "D30150";
