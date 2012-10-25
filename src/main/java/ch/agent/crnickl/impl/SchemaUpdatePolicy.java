@@ -31,7 +31,7 @@ import ch.agent.crnickl.api.ValueType;
  * @author Jean-Paul Vetterli
  * @version 1.0.0
  */
-public interface SchemaUpdatePolicy {
+public interface SchemaUpdatePolicy extends UpdatePolicy {
 	
 	/**
 	 * Throw an exception if the update is rejected.

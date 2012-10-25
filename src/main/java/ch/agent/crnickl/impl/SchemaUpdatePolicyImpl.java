@@ -25,6 +25,7 @@ import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.AttributeDefinition;
+import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.SeriesDefinition;
@@ -119,11 +120,12 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 			throw T2DBMsg.exception(D.D30140, schema.getName(), count);
 		
 		// (2) cannot delete if schema explicitly referenced by an entity
-		Collection<Surrogate> entities = database.findChronicles(schema);
-		if (entities.size() > 0)
-			throw T2DBMsg.exception(D.D30141, schema.getName(), entities.size());
+		Surrogate entity = database.findChronicle(schema);
+		if (entity != null) {
+			throw T2DBMsg.exception(D.D30141, schema.getName(), chronicleName(entity));
+		}
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -146,9 +148,9 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	 * A series definition can be deleted only if there are no series using it.
 	 */
 	private void willDeleteOrErase(UpdatableSchema schema, SeriesDefinition ss) throws T2DBException {
-		Collection<Surrogate> entities = database.findChronicles(ss, schema);
-		if (entities.size() > 0)
-			throw T2DBMsg.exception(D.D30150, ss.getNumber(), schema.getName(), entities.size());
+		Surrogate entity = database.findChronicle(ss, schema);
+		if (entity != null)
+			throw T2DBMsg.exception(D.D30150, ss.getNumber(), schema.getName(), chronicleName(entity));
 	}
 	
 	/**
@@ -170,9 +172,9 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 			if (database.isBuiltIn(def))
 				throw T2DBMsg.exception(D.D30148, def.getNumber(), ss.getNumber(), schema.getName()); 
 		} else {
-			Collection<Surrogate> entities = database.findChronicles(def.getProperty(), schema);
-			if (entities.size() > 0)
-				throw T2DBMsg.exception(D.D30146, def.getNumber(), schema.getName(), entities.size());
+			Surrogate entity = database.findChronicle(def.getProperty(), schema);
+			if (entity != null)
+				throw T2DBMsg.exception(D.D30146, def.getNumber(), schema.getName(), chronicleName(entity));
 		}
 	}
 
@@ -200,4 +202,13 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 	public <T> void willDelete(ValueType<T> valueType, T value)	throws T2DBException {
 	}
 	
+	private String chronicleName(Surrogate entity) {
+		try {
+			Chronicle c = entity.getDatabase().getChronicle(entity);
+			return c.getName(true);
+		} catch (T2DBException e) {
+			return entity.toString();
+		}
+	}
+
 }

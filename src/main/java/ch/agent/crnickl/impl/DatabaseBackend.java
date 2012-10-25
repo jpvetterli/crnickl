@@ -522,19 +522,18 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	UpdatableSchema getUpdatableSchema(Schema schema) throws T2DBException;
 	
 	/**
-	 * Return all chronicles referencing a given schema.
-	 * The result is a collection of {@link Surrogate} objects.
+	 * Return a chronicle referencing a given schema.
 	 * <p>
 	 * This is technical method used in schema management.
 	 * 
 	 * @param schema a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(Schema schema) throws T2DBException;
+	Surrogate findChronicle(Schema schema) throws T2DBException;
 
 	/**
-	 * Return all chronicles with an attribute value for the given property and
+	 * Return a chronicle with an attribute value for the given property and
 	 * schema.
 	 * <p>
 	 * This is technical method used in schema management.
@@ -543,22 +542,22 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 *            a property
 	 * @param schema
 	 *            a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(Property<?> property, Schema schema) throws T2DBException;
+	Surrogate findChronicle(Property<?> property, Schema schema) throws T2DBException;
 
 	/**
-	 * Return all chronicles with a series corresponding to the series definition 
+	 * Return a chronicle with a series corresponding to the series definition 
 	 * and with a schema dependent on the given schema.
 	 * <p>
 	 * This is technical method used in schema management.
 	 * 
 	 * @param ss a series definition
 	 * @param schema a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
-	Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException;
+	Surrogate findChronicle(SeriesDefinition ss, Schema schema) throws T2DBException;
 	
 }

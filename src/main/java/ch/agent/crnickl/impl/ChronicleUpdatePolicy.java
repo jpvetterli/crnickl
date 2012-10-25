@@ -35,7 +35,7 @@ import ch.agent.t2.time.TimeIndex;
  * @author Jean-Paul Vetterli
  * @version 1.1.0
  */
-public interface ChronicleUpdatePolicy {
+public interface ChronicleUpdatePolicy extends UpdatePolicy {
 
 	/**
 	 * Throw an exception if the intended update is rejected.
