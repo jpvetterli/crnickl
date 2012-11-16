@@ -185,54 +185,6 @@ public class SimpleDatabaseManager {
 	}
 	
 	/**
-	 * Set up a chronicle and its series for testing. If the chronicle already exists,
-	 * delete all the chronicles and series it contains. The method commits.
-	 * 
-	 * @param name
-	 *            the name of the chronicle
-	 * @param description
-	 *            the description of the chronicle
-	 * @throws KeyedException
-	 */
-	public void setUpTestChronicle(String name, String description) throws KeyedException {
-		Database db = getDatabase();
-		UpdatableChronicle upd = null;
-		Chronicle chronicle = db.getChronicle(name, false);
-		if (chronicle != null) {
-			deleteChronicleCollection(chronicle);
-			upd = chronicle.edit();
-			upd.applyUpdates();
-		} else {
-			String split[] = db.getNamingPolicy().split(name);
-			upd = db.getChronicle(split[0], true).edit();
-			upd = upd.createChronicle(split[1], false, description, null, null);
-			upd.applyUpdates();
-		}
-		for (SeriesDefinition ss : upd.getSchema(true).getSeriesDefinitions()) {
-			upd.createSeries(ss.getName());
-		}
-		upd.applyUpdates();
-		db.commit();
-	}
-	
-	/**
-	 * Delete everything under a chronicle.
-	 * @param name the name of a chronicle
-	 * @throws KeyedException
-	 */
-	public void deleteChronicleCollection(String name) throws KeyedException {
-		Database db = getDatabase();
-		UpdatableChronicle upd = null;
-		Chronicle chronicle = db.getChronicle(name, false);
-		if (chronicle != null) {
-			deleteChronicleCollection(chronicle);
-			upd = chronicle.edit();
-			upd.applyUpdates();
-			db.commit();
-		}
-	}
-	
-	/**
 	 * @param loose if true tolerate abscence of key-value separator
 	 * @param pairs a list of pairs
 	 * @param keyMap map for selecting and renaming keys or null
@@ -372,35 +324,6 @@ public class SimpleDatabaseManager {
 		}
 		dbf.addDatabase(config);
 		database = dbf.getDatabase(dbName);
-	}
-	
-	private int[] deleteChronicleCollection(Chronicle chronicle) throws KeyedException {
-		return deleteChronicle(chronicle, true);
-	}
-	
-	private int[] deleteChronicle(Chronicle chronicle, boolean top) throws KeyedException {
-		int ecount = 0;
-		int scount = 0;
-		for (Series<?> s : chronicle.getSeries()) {
-			UpdatableSeries<?> us = s.edit();
-			us.setRange(null);
-			us.applyUpdates();
-			us.destroy();
-			us.applyUpdates();
-			scount++;
-		}
-		for (Chronicle e : chronicle.getMembers()) {
-			int[] counts = deleteChronicle(e, false);
-			ecount += counts[0];
-			scount += counts[1];
-		}
-		if (!top) {
-			UpdatableChronicle ue = chronicle.edit();
-			ue.destroy();
-			ue.applyUpdates();
-			ecount++;
-		}
-		return new int[] { ecount, scount };
 	}
 
 }
