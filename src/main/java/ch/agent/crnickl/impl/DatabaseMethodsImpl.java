@@ -20,6 +20,8 @@
 package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.DBObject;
 import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
@@ -34,6 +36,22 @@ import ch.agent.crnickl.api.Surrogate;
  */
 public class DatabaseMethodsImpl implements DatabaseMethods, PermissionChecker {
 
+	/**
+	 * Throw an exception if the DBObject is null.
+	 * @param object an object
+	 * @param s its surrogate 
+	 * @param referrer the surrogate of the object's referrer or null 
+	 * @throws T2DBException
+	 */
+	public void checkIntegrity(DBObject object, Surrogate s, Surrogate referrer) throws T2DBException {
+		if (object == null) {
+			if (referrer == null)
+				throw T2DBMsg.exception(D.D02106, s.toString());
+			else
+				throw T2DBMsg.exception(D.D02107, s.toString(), referrer.toString());
+		}
+	}
+	
 	@Override
 	public Surrogate makeSurrogate(Database db, DBObjectType dot, DBObjectId id) {
 		return new SurrogateImpl((DatabaseBackend) db, dot, id);
