@@ -56,6 +56,11 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D01103 = "D01103";
 		public static final String D01104 = "D01104";
 		
+		public static final String D02102 = "D02102";
+		public static final String D02103 = "D02103";
+		public static final String D02106 = "D02106";
+		public static final String D02107 = "D02107";
+		
 		public static final String D10101 = "D10101";
 		public static final String D10102 = "D10102";
 		public static final String D10103 = "D10103";
@@ -63,6 +68,7 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D10105 = "D10105";
 		public static final String D10107 = "D10107";
 		public static final String D10108 = "D10108";
+		public static final String D10109 = "D10109";
 		public static final String D10110 = "D10110";
 		public static final String D10114 = "D10114";
 		public static final String D10115 = "D10115";
@@ -71,14 +77,19 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D10121 = "D10121";
 		public static final String D10122 = "D10122";
 		public static final String D10123 = "D10123";
-		
-		public static final String D02102 = "D02102";
-		public static final String D02103 = "D02103";
+		public static final String D10145 = "D10145";
+		public static final String D10146 = "D10146";
+		public static final String D10149 = "D10149";
+		public static final String D10157 = "D10157";
+		public static final String D10158 = "D10158";
 		
 		public static final String D20107 = "D20107";
 		public static final String D20108 = "D20108";
 		public static final String D20109 = "D20109";
 		public static final String D20110 = "D20110";
+		public static final String D20114 = "D20114";
+		public static final String D20115 = "D20115";
+		public static final String D20119 = "D20119";
 
 		public static final String D30105 = "D30105";
 		public static final String D30106 = "D30106";
@@ -147,6 +158,11 @@ public class T2DBMsg extends KeyedMessage {
 		public static final String D50111 = "D50111";
 		public static final String D50115 = "D50115";
 		public static final String D50116 = "D50116";
+		public static final String D50120 = "D50120"; 
+		public static final String D50121 = "D50121"; 
+		public static final String D50122 = "D50122"; 
+		public static final String D50123 = "D50123"; 
+		public static final String D50124 = "D50124"; 
 		public static final String D50130 = "D50130";
 	}
 	
