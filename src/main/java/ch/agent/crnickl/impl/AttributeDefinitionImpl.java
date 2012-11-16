@@ -200,7 +200,7 @@ public class AttributeDefinitionImpl<T> extends SchemaComponentImpl implements A
 	 * @throws T2DBException
 	 */
 	public void setValue(Object value) throws T2DBException {
-		Object old = this.value; int should_consider_null_value_stuff_when_testing_for_same;
+		Object old = this.value;
 		if (!same(old, value)) {
 			checkEdit();
 			this.value = value;

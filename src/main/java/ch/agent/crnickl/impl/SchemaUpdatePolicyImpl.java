@@ -207,6 +207,7 @@ public class SchemaUpdatePolicyImpl implements SchemaUpdatePolicy {
 			Chronicle c = entity.getDatabase().getChronicle(entity);
 			return c.getName(true);
 		} catch (T2DBException e) {
+			// no read permission for example
 			return entity.toString();
 		}
 	}
