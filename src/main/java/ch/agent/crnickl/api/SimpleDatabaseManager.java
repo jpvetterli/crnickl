@@ -119,7 +119,7 @@ public class SimpleDatabaseManager {
 	public SimpleDatabaseManager(String listSeparator, String kvSeparator, String dbNameKey, String dbClassKey, String fileKey, String parameterString) throws T2DBException {
 		try {
 			if (listSeparator == null || kvSeparator == null || fileKey == null || dbNameKey == null || dbClassKey == null || parameterString == null)
-				throw new IllegalArgumentException("no nul  argument allowed");
+				throw new IllegalArgumentException("no null argument allowed");
 			
 			this.listSep = Pattern.compile(listSeparator);
 			this.kvSep = Pattern.compile(kvSeparator);
