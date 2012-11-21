@@ -176,6 +176,10 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		return false;
 	}
 	
+	protected boolean isChronicleUpdatePolicyExtensionAllowed() {
+		return true;
+	}
+	
 	@Override
 	public void configure(DatabaseConfiguration configuration) throws T2DBException {
 		int cacheSize = 0;
@@ -213,6 +217,8 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Class_ChronicleUpdatePolicyExtension, false);
 		try {
 			if (parameter != null && ((String) parameter).length() > 0) {
+				if (!isChronicleUpdatePolicyExtensionAllowed())
+					throw T2DBMsg.exception(D.D00107);
 				Class<?> extClass;
 				extClass = Class.forName((String)parameter);
 				eupx = (ChronicleUpdatePolicyExtension) extClass.newInstance();
