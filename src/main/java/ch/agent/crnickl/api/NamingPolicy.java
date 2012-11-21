@@ -118,7 +118,7 @@ public class NamingPolicy {
 	 * @throws T2DBException
 	 */
 	public String checkSimpleName(String name, boolean canModify) throws T2DBException {
-		if (name == null || name.length() == 0 && name.length() > NAME_MAX_LENGTH)
+		if (name == null || name.length() == 0 || name.length() > NAME_MAX_LENGTH)
 			throw T2DBMsg.exception(D.D01103, name, NAME_MAX_LENGTH);
 		if (invalidCharMatcher == null)
 			invalidCharMatcher = Pattern.compile(invalidCharPattern).matcher("");
