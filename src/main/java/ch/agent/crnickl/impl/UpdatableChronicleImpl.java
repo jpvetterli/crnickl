@@ -140,7 +140,7 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 			result = schema;
 		else {
 			if (getSurrogate().inConstruction()) {
-				if (collection != null)
+				if (effective && collection != null)
 					result = collection.getSchema(effective);
 			} else {
 				result = super.getSchema(effective);
