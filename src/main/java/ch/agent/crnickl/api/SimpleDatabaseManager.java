@@ -40,8 +40,7 @@ import ch.agent.crnickl.T2DBMsg.D;
 
 /**
  * A DatabaseManager sets up a {@link Database} using parameters specified in
- * various ways. It also provides a few methods used again and again when
- * writing tests.
+ * various ways. 
  * 
  * @author Jean-Paul Vetterli
  * @version 1.1.0
