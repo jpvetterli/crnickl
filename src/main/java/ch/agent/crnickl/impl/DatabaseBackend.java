@@ -42,6 +42,7 @@ import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeseries.Observation;
 import ch.agent.t2.timeseries.TimeAddressable;
+import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
  * DatabaseBackend extends {@link Database} with methods used only in the implementation.
@@ -81,6 +82,12 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final int MAX_MAGIC_NR = 9;
 
 	/** 
+	 * The name of the external parameter specifying the maximum gap for time series.
+	 * If specified, the value is set with {@link TimeSeriesFactory#setMaxGap()}.
+	 * When not specified, a built-in value is used.
+	 */
+	public static final String DB_PARAM_Int_MAX_GAP = "timeSeriesMaxGap";
+	/** 
 	 * The name of the external parameter specifying the cache size. The actual cache size is often larger,
 	 * because after taking the load factor into account, the actual size must be a power of 2.
 	 * For example, a cache size of 96 with a load factor of 0.75, corresponds to 128, a power of 2;
@@ -107,8 +114,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final String DB_PARAM_Class_PermissionChecker = "dbPermissionChecker";
 	/**
 	 * The default cache size.
-	 * <p>
-	 * 
 	 */
 	public static final int DB_PARAM_Int_CACHE_SIZE_DEFAULT = 96; // 96/0.75 = 128, a power of 2 so won't be tweaked
 	/**
