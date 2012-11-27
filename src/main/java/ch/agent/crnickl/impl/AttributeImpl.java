@@ -63,7 +63,7 @@ public class AttributeImpl<T> implements Attribute<T> {
 	
 	@Override
 	public void reset() {
-		value = definition.getValue();
+		value = null;
 	}
 
 	@Override

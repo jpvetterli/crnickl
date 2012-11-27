@@ -43,10 +43,10 @@ public interface Attribute<T> {
 	Property<T> getProperty();
 	
 	/**
-	 * Return the attribute's value. This value is either the default value, taken from
-	 * the {@link AttributeDefinition},
-	 * or the value set with {@link #set} or {@link #scan}.
-	 *  
+	 * Return the attribute's value. This value is either the default value,
+	 * taken from the {@link AttributeDefinition}, or the value set with
+	 * {@link #set} or {@link #scan}.
+	 * 
 	 * @return the value of the attribute
 	 */
 	T get();
@@ -68,16 +68,27 @@ public interface Attribute<T> {
 	void setDescription(String description);
 	
 	/**
-	 * Reset the default value of the attribute. The default is taken from the
-	 * {@link AttributeDefinition}.
+	 * Reset the default value of the attribute. 
+	 * This removes the current value of the attribute with the consequence
+	 * that the current default value taken from the {@link AttributeDefinition} 
+	 * will apply.
+	 * <p>
+	 * <b>Note</b>
+	 * <p>
+	 * When an attribute value happens to be equal to the default
+	 * value but should not change when the default is updated, 
+	 * it must be set explicitly.
 	 */
 	void reset();
 	
 	/**
-	 * Set the value of the attribute. The value must agree with the 
-	 * {@link AttributeDefinition}, as enforced by {@link Property#check(Object)}.
+	 * Set the value of the attribute. The value must agree with the
+	 * {@link AttributeDefinition}, as enforced by
+	 * {@link Property#check(Object)}. Setting the value to null has the same
+	 * effect as calling {@link #reset}.
 	 * 
-	 * @param value a value for the attribute
+	 * @param value
+	 *            a value for the attribute
 	 * @throws T2DBException
 	 */
 	void set(T value) throws T2DBException;
