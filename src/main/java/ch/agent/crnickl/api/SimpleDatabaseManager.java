@@ -159,7 +159,7 @@ public class SimpleDatabaseManager {
 	 * @throws KeyedException
 	 */
 	public Database getDatabase() throws KeyedException {
-		if (database ==null)
+		if (database == null)
 			setUp();
 		return database;
 	}
