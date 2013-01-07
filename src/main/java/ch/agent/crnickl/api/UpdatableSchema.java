@@ -74,7 +74,8 @@ public interface UpdatableSchema extends Schema, Updatable {
 	void setName(String name) throws T2DBException;
 	
 	/**
-	 * Set the base of the schema.
+	 * Set the base of the schema. When not null, the base schema may 
+	 * not be in construction (see {@link DBObject#inConstruction()}).
 	 * 
 	 * @param base an updatable schema or null
 	 * @throws T2DBException
