@@ -56,6 +56,7 @@ public interface Attribute<T> {
 	 * parameter is set, and there is no description, and the attribute value is from a
 	 * value list, return the description from the value list, if any.
 	 * 
+	 * @param effective if true fall back to description from definition 
 	 * @return a description of the current attribute value
 	 */
 	String getDescription(boolean effective);
