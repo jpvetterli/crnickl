@@ -61,23 +61,23 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final String BUILTIN_PROP_SPARSITY = "Sparsity";
 	
 	/**
-	 * The number for the NAME built-in value type and corresponding property and attribute.
+	 * The number for the NAME built-in attribute.
 	 */
 	public static final int MAGIC_NAME_NR = 1;
 	/**
-	 * The number for the TYPE built-in value type and corresponding property and attribute.
+	 * The number for the TYPE built-in attribute.
 	 */
 	public static final int MAGIC_TYPE_NR = 2;
 	/**
-	 * The number for the TIMEDOMAIN built-in value type and corresponding property and attribute.
+	 * The number for the TIMEDOMAIN built-in attribute.
 	 */
 	public static final int MAGIC_TIMEDOMAIN_NR = 3;
 	/**
-	 * The number for the SPARSITY boolean built-in value type and corresponding property and attribute.
+	 * The number for the SPARSITY boolean built-in attribute.
 	 */
 	public static final int MAGIC_SPARSITY_NR = 4;
 	/**
-	 * The largest reserved number for value types, properties and attributes. 
+	 * The largest reserved number for built-in attributes. 
 	 */
 	public static final int MAX_MAGIC_NR = 9;
 
