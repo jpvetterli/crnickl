@@ -239,7 +239,7 @@ public interface Chronicle extends DBObject {
 	
 	/**
 	 * Return all existing series in this chronicle. The result includes all
-	 * series which have been create, whether empty or not.
+	 * series which have been created, whether empty or not.
 	 * 
 	 * @return all existing series of the chronicle
 	 * @throws T2DBException
