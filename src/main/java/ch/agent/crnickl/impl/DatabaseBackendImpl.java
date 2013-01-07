@@ -348,7 +348,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		String name = getTopChronicle().getName(true);
 		name = getNamingPolicy().checkSimpleName(name, false);
 		if (!isStrictNameSpaceMode()) {
-			Collection<Chronicle> topMembers = null;;
+			Collection<Chronicle> topMembers = null;
 			try {
 				topMembers = topChronicle.getMembers();
 			} catch (T2DBException e) {
