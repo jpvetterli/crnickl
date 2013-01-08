@@ -18,11 +18,9 @@ crnickl : The CrNiCKL Database
 *** 
 
 CrNiCKL (pronounced "chronicle") is a database for time series written in Java 
-and running on top of SQL and (soon) NoSQL systems. The base system cannot run 
-by itself, it requires an implementation. 
-The [project website](http://agent.ch/timeseries/crnickl/)
-provides information on available implementations. 
-A typical implementation is the JDBC implementation.
+and running on top of SQL and NoSQL systems. The base system cannot run 
+by itself, it requires a driver. 
+Currently, drivers are available for JDBC and MongoDB.
 
 Distribution
 ------------
@@ -40,8 +38,9 @@ than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`.
 For Maven users
 ---------------
 
-Starting with version 1.1.2, the software is available from the central maven 
-repository. To use version x.y.z, insert the following dependency into your 
+Starting with version 1.1.2, the software is available from the <a 
+href="http://repo.maven.apache.org/maven2/ch/agent/crnickl/">Maven central 
+repository</a>. To use version x.y.z, insert the following dependency into your 
 `pom.xml` file:
 
     <dependency>
@@ -68,12 +67,17 @@ repository. They can also be found in the `target` directory.
 When building the software by other means, the following dependencies must be
 addressed:
 
-- `t2-<version>.jar` [Time2 Library](http://agent.ch/timeseries/t2/) 
+- `t2-<version>.jar` (see [Time2 Library](<http://agent.ch/timeseries/t2/>)) 
 
 Versions numbers can be found in the <q>POM</q> file included in the binary 
 JAR:
 
 	/META-INF/maven/ch.agent/crnickl/pom.xml
+
+Most often CrNiCKL is pulled as a transitive dependency by the actual CrNiCKL 
+database driver chosen for an application. Drivers are available from
+[GitHub](<https://github.com/jpvetterli/>) and 
+[Maven](<http://repo.maven.apache.org/maven2/ch/agent/>).
 
 Browsing the source code
 ------------------------
@@ -87,7 +91,7 @@ Finding more information
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
 
-<small>Updated: 2012-09-07/jpv</small>
+<small>Updated: 2012-12-20/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
