@@ -1,7 +1,7 @@
 crnickl : The CrNiCKL Database
 ==============================
 
-	Copyright 2012 Hauser Olsson GmbH.
+	Copyright 2012-2013 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ Finding more information
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
 
-<small>Updated: 2012-12-20/jpv</small>
+<small>Updated: 2013-01-08/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 

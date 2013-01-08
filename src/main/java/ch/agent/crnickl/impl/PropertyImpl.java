@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012 Hauser Olsson GmbH
+ *   Copyright 2012-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.crnickl.impl
- * Type: PropertyImpl
- * Version: 1.0.0
  */
 package ch.agent.crnickl.impl;
 
@@ -34,7 +31,6 @@ import ch.agent.crnickl.api.ValueType;
  * Default implementation of {@link Property}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
  * @param <T> the underlying data type of attributes having this property
  */
 public class PropertyImpl<T> extends DBObjectImpl implements Property<T> {

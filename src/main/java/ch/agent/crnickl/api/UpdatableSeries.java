@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012 Hauser Olsson GmbH
+ *   Copyright 2012-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.crnickl.api
- * Type: UpdatableSeries
- * Version: 1.1.0
  */
 package ch.agent.crnickl.api;
 
@@ -29,7 +26,6 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * An UpdatableSeries is a series which can be modified.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.1.0
  * @param <T> the class of the elements of the underlying time series
  */
 public interface UpdatableSeries<T> extends Series<T>, Updatable {

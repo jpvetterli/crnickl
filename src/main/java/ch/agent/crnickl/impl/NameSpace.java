@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012 Hauser Olsson GmbH
+ *   Copyright 2012-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.crnickl.impl
- * Type: NameSpace
- * Version: 1.1.0
  */
 package ch.agent.crnickl.impl;
 
@@ -38,7 +35,6 @@ import ch.agent.crnickl.api.UpdatableSeries;
  * The top-level chronicle exists only virtually, and is never stored.
  *
  * @author Jean-Paul Vetterli
- * @version 1.1.0
  */
 public class NameSpace extends UpdatableChronicleImpl {
 

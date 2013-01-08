@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012 Hauser Olsson GmbH
+ *   Copyright 2012-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.crnickl.api
- * Type: SeriesDefinition
- * Version: 1.0.0
  */
 package ch.agent.crnickl.api;
 
@@ -29,7 +26,6 @@ import ch.agent.t2.time.TimeDomain;
  * Like a schema, a series definition can define a number of {@link Attribute}s.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
  */
 public interface SeriesDefinition extends SchemaComponent, IncompleteSchema, Comparable<SeriesDefinition> {
 	
