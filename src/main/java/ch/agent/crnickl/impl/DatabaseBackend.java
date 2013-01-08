@@ -79,7 +79,7 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 
 	/** 
 	 * The name of the external parameter specifying the maximum gap for time series.
-	 * If specified, the value is set with {@link TimeSeriesFactory#setMaxGap()}.
+	 * If specified, the value is set with <code>TimeSeriesFactory.setMaxGap()</code>.
 	 * When not specified, a built-in value is used.
 	 */
 	public static final String DB_PARAM_Int_MAX_GAP = "timeSeriesMaxGap";

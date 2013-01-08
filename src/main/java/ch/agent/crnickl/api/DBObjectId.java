@@ -19,9 +19,9 @@ package ch.agent.crnickl.api;
  * DBObjectId hides the details of IDs provided by different database engines.
  * Such IDs are often used as primary or unique keys.
  * <p>
- * Implementations are expected to provide correct, useful and efficient
- * implementations of {@link #equals(Object)}, {@link #hashCode()} and
- * {@link #toString()}.
+ * Implementations are expected to provide correct, useful, and efficient
+ * code for <code>equals(Object)</code>, <code>hashCode()</code> and
+ * <code>toString()</code>.
  * 
  * @author Jean-Paul Vetterli
  * 
