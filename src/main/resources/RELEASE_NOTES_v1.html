@@ -1,6 +1,6 @@
 <h1>CrNiCKL RELEASE NOTES</h1>
 
-<pre><code>Copyright 2012 Hauser Olsson GmbH.
+<pre><code>Copyright 2012-2013 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,58 @@ modified in such a way that clients using it need to be recoded or even
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
 number is incremented.</p>
+
+<hr />
+
+<p><a name="v1_2_0">2013-01-08/jpv</a></p>
+
+<h2>Version 1.2.0 &mdash; Code refactored to accommodate NoSQL drivers</h2>
+
+<p>This is a refactoring release which behaves like the previous version and is 
+plug-compatible for client applications, except in one trivial case mentionned 
+below. The primary goal of this refactoring is to optimize code reuse between 
+SQL and NoSQL drivers (currently crnickl-jdbc and crnickl-mongodb). The release 
+also includes bug and documentation fixes. </p>
+
+<p>The administrative information included in files is now limited to a copyright 
+notice. Version tags have been removed from all files, because their maintenance 
+cost greatly exceeds their value. Complete file history is available from the 
+SCM (git).</p>
+
+<p>Compared to version 1.1.2, the java code in the following files has been 
+modified:</p>
+
+<ul>
+<li>ch/agent/crnickl/T2DBMsg.java : messages used in more than one driver pulled 
+up</li>
+<li>ch/agent/crnickl/api/AttributeDefinition.java : <code>isErasing()</code> pulled up </li>
+<li>ch/agent/crnickl/api/Database.java : new method added </li>
+<li>ch/agent/crnickl/api/DBObject.java : new methods added</li>
+<li>ch/agent/crnickl/api/DBObjectId.java : new interface </li>
+<li>ch/agent/crnickl/api/NamingPolicy.java : bug fixed</li>
+<li>ch/agent/crnickl/api/SimpleDatabaseManager.java : unit testing support methods 
+removed. This is the only modification which breaks
+backwards compatibility (and the reason why the crnickl version is now 1.2.0 
+instead of 1.1.3). Because these methods should never have been included 
+in this class, this can be considered a bug fix.  </li>
+<li>ch/agent/crnickl/api/SchemaComponent.java : new method added,
+<code>isErasing()</code> pulled up, and <code>consolidate()</code> deprecated</li>
+<li>ch/agent/crnickl/api/SeriesDefinition.java : <code>isErasing()</code> pulled up </li>
+<li>ch/agent/crnickl/api/Surrogate.java : new method added</li>
+<li>ch/agent/crnickl/api/UpdatableSchema.java : new method added</li>
+<li>ch/agent/crnickl/api/ValueType.java : <code>isBuiltIn()</code> deprecated</li>
+</ul>
+
+<p>Many more code modifications have been made in package ch/agent/crnickl/impl 
+but are not listed here since they do not affect client code directly. In 
+addition, various non-code modifications (documentation and administrative 
+information) have been performed on all source files.</p>
+
+<p><strong>Related software</strong></p>
+
+<p>There is a new version of the CrNiCKL Demo, <code>crnickl-demo 1.1.4</code>, 
+a new version of the CrNiCKL JDBC driver, <code>crnickl-jdbc 1.1.3</code>,
+and a new CrNiCKL MongoDB driver, <code>crnickl-mongodb 1.0.0</code>.</p>
 
 <hr />
 

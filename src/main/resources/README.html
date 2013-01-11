@@ -1,6 +1,6 @@
 <h1>crnickl : The CrNiCKL Database</h1>
 
-<pre><code>Copyright 2012 Hauser Olsson GmbH.
+<pre><code>Copyright 2012-2013 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@ limitations under the License.
 <hr />
 
 <p>CrNiCKL (pronounced "chronicle") is a database for time series written in Java 
-and running on top of SQL and (soon) NoSQL systems. The base system cannot run 
-by itself, it requires an implementation. 
-The <a href="http://agent.ch/timeseries/crnickl/">project website</a>
-provides information on available implementations. 
-A typical implementation is the JDBC implementation.</p>
+and running on top of SQL and NoSQL systems. The base system cannot run 
+by itself, it requires a driver. 
+Currently, drivers are available for JDBC and MongoDB.</p>
 
 <h2>Distribution</h2>
 
 <p>Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:</p>
+compiled classes, of a javadoc JAR and of a source JAR. The current version
+is 1.2.0:</p>
 
-<pre><code>crnickl-x.y.z.jar
-crnickl-x.y.z-javadoc.jar
-crnickl-x.y.z-sources.jar
+<pre><code>crnickl-1.2.0.jar
+crnickl-1.2.0-javadoc.jar
+crnickl-1.2.0-sources.jar
 </code></pre>
 
 <p>For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
@@ -39,8 +38,9 @@ than 1.1.1, the suffix of the source JAR is <code>.source</code> instead of <cod
 
 <h2>For Maven users</h2>
 
-<p>Starting with version 1.1.2, the software is available from the central maven 
-repository. To use version x.y.z, insert the following dependency into your 
+<p>Starting with version 1.1.2, the software is available from the <a 
+href="http://repo.maven.apache.org/maven2/ch/agent/crnickl/">Maven central 
+repository</a>. To use version x.y.z, insert the following dependency into your 
 <code>pom.xml</code> file:</p>
 
 <pre><code>&lt;dependency&gt;
@@ -69,7 +69,7 @@ repository. They can also be found in the <code>target</code> directory.</p>
 addressed:</p>
 
 <ul>
-<li><code>t2-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/t2/">Time2 Library</a> </li>
+<li><code>t2-&lt;version&gt;.jar</code> (see <a href="http://agent.ch/timeseries/t2/">Time2 Library</a>) </li>
 </ul>
 
 <p>Versions numbers can be found in the <q>POM</q> file included in the binary 
@@ -77,6 +77,11 @@ JAR:</p>
 
 <pre><code>/META-INF/maven/ch.agent/crnickl/pom.xml
 </code></pre>
+
+<p>Most often CrNiCKL is pulled as a transitive dependency by the actual CrNiCKL 
+database driver chosen for an application. Drivers are available from
+<a href="https://github.com/jpvetterli/">GitHub</a> and 
+<a href="http://repo.maven.apache.org/maven2/ch/agent/">Maven</a>.</p>
 
 <h2>Browsing the source code</h2>
 
@@ -88,6 +93,6 @@ JAR:</p>
 <p>More information on CrNiCKL is available at 
 <a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.</p>
 
-<p><small>Updated: 2012-09-07/jpv</small></p>
+<p><small>Updated: 2013-01-08/jpv</small></p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>

@@ -26,11 +26,12 @@ Distribution
 ------------
 
 Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:
+compiled classes, of a javadoc JAR and of a source JAR. The current version
+is 1.2.0:
 
-	crnickl-x.y.z.jar
-	crnickl-x.y.z-javadoc.jar
-	crnickl-x.y.z-sources.jar
+	crnickl-1.2.0.jar
+	crnickl-1.2.0-javadoc.jar
+	crnickl-1.2.0-sources.jar
 
 For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
 than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`. 
