@@ -363,16 +363,16 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 		Chronicle current = getDatabase().getChronicle(this);
 		Chronicle collection = getCollection();
 		Schema schema = getSchema(false);
-		if (!equals(name, current.getName(false))) {
+		if (!equal(name, current.getName(false))) {
 			getDatabase().getNamingPolicy().checkSimpleName(name, false);
 			anything = true;
 		}
-		if (!equals(description, current.getDescription(false))) {
+		if (!equal(description, current.getDescription(false))) {
 			anything = true;
 		}
-		if (!equals(collection, current.getCollection()))
+		if (!equal(collection, current.getCollection()))
 			throw T2DBMsg.exception(D.D40110, getName(true)); // not supported (yet)
-		if (!equals(schema, current.getSchema(false)))
+		if (!equal(schema, current.getSchema(false)))
 			throw T2DBMsg.exception(D.D40111, getName(true)); // not supported (yet)
 		if (anything)
 			getDatabase().update(this);
@@ -380,20 +380,19 @@ public class UpdatableChronicleImpl extends ChronicleImpl implements UpdatableCh
 	}
 
 	/**
-	 * Return true if two objects are not null and equal.
+	 * Return true if the two objects are equal or if they are both null.
 	 * 
 	 * @param object1
-	 *            first object or null allowed
+	 *            first object or null
 	 * @param object2
-	 *            second object or null allowed
-	 * @return
+	 *            second object or null
+	 * @return true if the arguments are equal
 	 */
-	private boolean equals(Object object1, Object object2) {
+	private boolean equal(Object object1, Object object2) {
 		if (object1 == object2)
 			return true;
-		if ((object1 == null) || (object2 == null)) {
+		if ((object1 == null) || (object2 == null))
 			return false;
-		}
 	    return object1.equals(object2);
 	}
 

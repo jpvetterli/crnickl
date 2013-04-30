@@ -111,9 +111,9 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 	/**
 	 * Return true if r is null or if t is in range r.
 	 * 
-	 * @param t
-	 * @param r
-	 * @return
+	 * @param t a time 
+	 * @param r a range
+	 * @return true if time t is in range r or if r is null
 	 */
 	private boolean isInRange(long t, Range r) {
 		return r == null || r.isInRange(t);
