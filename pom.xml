@@ -21,7 +21,7 @@
 
   <groupId>ch.agent</groupId>
   <artifactId>crnickl</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <packaging>jar</packaging>
   <name>CrNiCKL database</name>
   <description>CrNiCKL (pronounced "chronicle") provides a data model and a database manager for generic time series.</description>

@@ -28,6 +28,28 @@ number is incremented.</p>
 
 <hr />
 
+<p><a name="v1_2_1">2013-04-30/jpv</a></p>
+
+<h2>Version 1.2.1 &mdash; API enhancement</h2>
+
+<p>This backward compatible release adds a new <code>Database</code> method <code>makeSurrogate()</code>
+which returns a <code>Surrogate</code> for a string. It was always possible to create such 
+strings using a surrogate's <code>toString()</code> method, but going the other way 
+required making assumptions and using non-API methods. </p>
+
+<p>Related code modifications have been made in package <code>ch/agent/crnickl/impl</code> 
+but they do not affect client code directly.</p>
+
+<p><strong>Related software</strong></p>
+
+<p>Modifications have been made to JUnit tests in <code>crnickl-test-1.1.0.jar</code> to 
+address issues related to Java 7.
+Dependencies on <code>crnickl</code> and <code>crnickl-test</code> have been upgraded in the
+following new releases: <code>crnickl-demo-1.1.5.jar</code>, <code>crnickl-jdbc-1.1.4.jar</code> and
+<code>crnickl-mongodb-1.0.1.jar</code>.</p>
+
+<hr />
+
 <p><a name="v1_2_0">2013-01-08/jpv</a></p>
 
 <h2>Version 1.2.0 &mdash; Code refactored to accommodate NoSQL drivers</h2>
@@ -201,14 +223,10 @@ contains only sources.</p>
 
 <hr />
 
-<p><small>
-Note. CrNiCKL is a relaunch under a new name of ChronoDB. 
+<p>Note. CrNiCKL is a relaunch under a new name of ChronoDB. 
 The software is the same, except that all package names have changed.
 ChronoDB will remain accessible for a while at 
 <a href="http://agent.ch/timeseries/chronodb/">http://agent.ch/timeseries/chronodb/</a>
-but will not be updated. 
-</small></p>
-
-<p><small>Updated: 2012-08-28/jpv</small></p>
+but will not be updated. </p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>

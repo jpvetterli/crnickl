@@ -29,6 +29,29 @@ number is incremented.
 
 *************************************************************
 
+<a name="v1_2_1">2013-04-30/jpv</a>
+
+Version 1.2.1 &mdash; API enhancement
+-------------------------------------
+
+This backward compatible release adds a new `Database` method `makeSurrogate()`
+which returns a `Surrogate` for a string. It was always possible to create such 
+strings using a surrogate's `toString()` method, but going the other way 
+required making assumptions and using non-API methods. 
+
+Related code modifications have been made in package `ch/agent/crnickl/impl` 
+but they do not affect client code directly.
+
+__Related software__
+
+Modifications have been made to JUnit tests in `crnickl-test-1.1.0.jar` to 
+address issues related to Java 7.
+Dependencies on `crnickl` and `crnickl-test` have been upgraded in the
+following new releases: `crnickl-demo-1.1.5.jar`, `crnickl-jdbc-1.1.4.jar` and
+`crnickl-mongodb-1.0.1.jar`.
+
+*************************************************************
+
 <a name="v1_2_0">2013-01-08/jpv</a>
 
 Version 1.2.0 &mdash; Code refactored to accommodate NoSQL drivers
@@ -189,14 +212,11 @@ An accompanying demo has been released.
 
 *************************************************************
 
-<small>
 Note. CrNiCKL is a relaunch under a new name of ChronoDB. 
 The software is the same, except that all package names have changed.
 ChronoDB will remain accessible for a while at 
 <http://agent.ch/timeseries/chronodb/>
 but will not be updated. 
-</small>
 
-<small>Updated: 2012-08-28/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
