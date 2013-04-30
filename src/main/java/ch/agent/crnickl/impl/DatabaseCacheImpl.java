@@ -293,7 +293,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	
 	/**
 	 * @param schema may be null
-	 * @return
+	 * @return the single copy of schema in cache
 	 */
 	private SchemaImpl ref(SchemaImpl schema) {
 		SchemaImpl esh = null;
@@ -358,7 +358,7 @@ public class DatabaseCacheImpl implements DatabaseCache {
 	
 	/**
 	 * @param property may not be null
-	 * @return
+	 * @return the single copy of property in cache
 	 */
 	private Property<?> ref(Property<?> property) {
 		DBObjectId id = property.getId();
