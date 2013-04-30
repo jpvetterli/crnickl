@@ -23,6 +23,7 @@ import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Schema;
@@ -39,7 +40,6 @@ import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeseries.Observation;
 import ch.agent.t2.timeseries.TimeAddressable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
  * DatabaseBackend extends {@link Database} with methods used only in the implementation.
@@ -188,6 +188,17 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	 * @return the schema update policy
 	 */
 	SchemaUpdatePolicy getSchemaUpdatePolicy();
+	
+	/**
+	 * Return a {@link DBObjectId} corresponding to an object. The actual form
+	 * of the input depends on the current database driver.
+	 * 
+	 * @param object
+	 *            an object
+	 * @return a DBObjectId
+	 * @throws T2DBException
+	 */
+	DBObjectId makeDBObjectId(Object object) throws T2DBException;
 	
 	/**
 	 * Get the property with the given name from the database. 

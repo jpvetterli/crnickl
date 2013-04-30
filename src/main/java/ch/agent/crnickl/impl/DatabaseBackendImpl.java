@@ -154,6 +154,11 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		this.strictNameSpaceMode = strictNameSpaceMode;
 	}
 
+	@Override
+	public Surrogate makeSurrogate(String string) throws T2DBException {
+		return SurrogateImpl.makeSurrogate(this, string);
+	}
+
 	/**
 	 * Check the validity of a surrogate for this database and a given database object type.
 	 * 

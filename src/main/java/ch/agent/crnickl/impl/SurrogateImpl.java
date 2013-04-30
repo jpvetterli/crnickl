@@ -17,6 +17,8 @@
 package ch.agent.crnickl.impl;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.DBObject;
 import ch.agent.crnickl.api.DBObjectId;
@@ -99,6 +101,30 @@ public class SurrogateImpl implements Surrogate {
 		this.db = db;
 		this.dot = dot;
 		this.id = id;
+	}
+	
+	/**
+	 * Create a surrogate from a string.
+	 * The required format is the one produced by {@link #toString}.
+	 * The database of the surrogate must agree with the database parameter.
+	 * 
+	 * @param db a database
+	 * @param surrogate a string representation of a surrogate
+	 * @return a surrogate
+	 * @throws T2DBException
+	 */
+	protected static Surrogate makeSurrogate(DatabaseBackend db, String surrogate) throws T2DBException {
+		try {
+			String[] parts = surrogate.split("-");
+			String dbName = db.getTopChronicle().getName(true);
+			if (!dbName.equals(parts[0]))
+				throw T2DBMsg.exception(D.D02103, parts[0], dbName);
+			return new SurrogateImpl(db, 
+					DBObjectType.values()[Integer.parseInt(parts[1])], 
+					db.makeDBObjectId(parts[2]));
+		} catch (Throwable t) {
+			throw T2DBMsg.exception(t, D.D02104, surrogate);
+		}
 	}
 	
 	@Override

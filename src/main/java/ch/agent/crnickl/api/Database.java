@@ -113,6 +113,19 @@ public interface Database {
 	MessageListener getMessageListener();
 	
 	/**
+	 * Return a {@link Surrogate} corresponding to the input. The input is
+	 * typically a string returned by {@link Surrogate#toString()}. An exception
+	 * is thrown if there is a syntax error or if the database of the surrogate
+	 * is unknown.
+	 * 
+	 * @param string
+	 *            a string representation of a surrogate
+	 * @return a surrogate corresponding to the string
+	 * @throws T2DBException
+	 */
+	Surrogate makeSurrogate(String string) throws T2DBException; 
+	
+	/**
 	 * Return the chronicle identified by a surrogate.
 	 * 
 	 * @param surrogate a surrogate
