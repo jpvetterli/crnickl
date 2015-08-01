@@ -48,9 +48,13 @@ import ch.agent.crnickl.api.ValueType.StandardValueType;
  * 
  * Read/write objects are obtained from the read only objects using the <code>edit()</code> method. 
  * <p>
- * Two methods are provided for transactions management: {@link #commit()} and {@link #rollback()}.
+ * Two methods are provided for transactions management: {@link #commit} and {@link #rollback}.
  * These methods are not used internally by CrNiCKL. Managing transactions and implementing
  * transaction boundaries is the client's responsibility.
+ * <p>
+ * Applications control a database using four methods: {@link #configure}, {@link #open}, 
+ * {@link #close}, and {@link #clear}. Depending on the implementation, only the first of these
+ * methods is mandatory.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -64,6 +68,36 @@ public interface Database {
 	 */
 	void configure(DatabaseConfiguration configuration) throws T2DBException;
 	
+	/**
+	 * Open the database. This method must not be called before
+	 * {@link #configure}. What the method does depends on the implementation.
+	 * On some implementations it is not necessary to invoke the method before
+	 * using the database. Depending on the implementation it is possible to
+	 * continue using the database after a fatal error by invoking
+	 * {@link #close} then {@link #open}.
+	 * 
+	 * @throws T2DBException
+	 */
+	void open() throws T2DBException;
+	
+	/**
+	 * Close the database. What the method does depends on the implementation.
+	 * Depending on the implementation it is possible to continue using the
+	 * database after a fatal error by invoking {@link #close} then
+	 * {@link #open}.
+	 * 
+	 * @throws T2DBException
+	 */
+	void close() throws T2DBException;
+
+	/**
+	 * Clear the internal state of the database. What the method does depends on
+	 * the implementation. The typical one clears any cached information.
+	 * 
+	 * @throws T2DBException
+	 */
+	void clear() throws T2DBException;
+
 	/**
 	 * Write all updates since the last commit or rollback to permanent storage.
 	 * It is the client's responsibility to call this method.

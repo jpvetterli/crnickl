@@ -86,6 +86,19 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 		nm = new NamingPolicy();
 		am = new HashMap<String, ValueAccessMethods<?>>();
 	}
+	
+	@Override
+	public void open() throws T2DBException {
+	}
+
+	@Override
+	public void close() throws T2DBException {
+	}
+
+	@Override
+	public void clear() throws T2DBException {
+		getCache().clear();
+	}
 
 	private MessageListener getDefaultMessageListener() {
 		return new MessageListener() {
