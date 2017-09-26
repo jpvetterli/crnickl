@@ -40,8 +40,8 @@ import ch.agent.crnickl.api.ValueType;
 import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.TimeDomain;
-import ch.agent.t2.time.TimeDomainFactory;
-import ch.agent.t2.time.TimeDomainManager;
+import ch.agent.t2.time.TimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalogSingleton;
 
 /**
  * Default implementation of {@link ValueType}.
@@ -190,10 +190,10 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 	 */
 	public static class TimeDomainScanner implements ValueScanner<TimeDomain> {
 
-		private TimeDomainFactory factory;
+		private TimeDomainCatalog catalog;
 		
 		public TimeDomainScanner() {
-			factory = TimeDomainManager.getFactory();
+			catalog = TimeDomainCatalogSingleton.instance();
 		}
 
 		@Override
@@ -208,7 +208,7 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 		@Override
 		public TimeDomain scan(String value) throws T2DBException {
 			try {
-				return factory.get(value);
+				return catalog.get(value);
 			} catch (Exception e) {
 				throw T2DBMsg.exception(e, D.D10107, value, ValueType.class.getName());
 			}
