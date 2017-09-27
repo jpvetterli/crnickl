@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
  * 
@@ -108,9 +109,9 @@ public class DatabaseFactory {
 		if (configuration == null)
 			throw T2DBMsg.exception(D.D00101, name);
 		try {
-			Class<? extends Database> klass = configuration.getDatabaseClass();
-			Constructor<? extends Database> constructor = klass.getConstructor(String.class);
-			Database d = constructor.newInstance(name);
+			Class<? extends Database> dbClass = configuration.getDatabaseClass();
+			Constructor<? extends Database> constructor = dbClass.getConstructor(String.class, TimeDomainCatalog.class);
+			Database d = constructor.newInstance(name, configuration.getTimeDomainCatalog());
 			d.configure(configuration);
 			return d;
 		} catch (Exception e) {

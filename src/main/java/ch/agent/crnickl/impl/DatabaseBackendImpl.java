@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import ch.agent.crnickl.api.UpdateEventOperation;
 import ch.agent.crnickl.api.UpdateEventPublisher;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.t2.time.Range;
+import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeseries.Observation;
 import ch.agent.t2.timeseries.TimeAddressable;
@@ -64,6 +65,7 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	private int hashCode = -1;
 	
 	private DatabaseCache cache;
+	private final TimeDomainCatalog timeDomainCatalog;
 	private UpdateEventPublisher eventHub;
 	private NameSpace topChronicle;
 	private MessageListener messageListener;
@@ -79,14 +81,21 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	 * Construct a {@link DatabaseBackend}.
 	 * 
 	 * @param name the name of the database
+	 * @param timeDomainCatalog the catalog to use for scanning time domains
 	 */
-	public DatabaseBackendImpl(String name) {
+	public DatabaseBackendImpl(String name, TimeDomainCatalog timeDomainCatalog) {
 		topChronicle = new NameSpace(name, String.format("%s (%s)", getClass().getSimpleName(), name), new SurrogateImpl(this, DBObjectType.CHRONICLE, null));
 		setMessageListener(null);
 		nm = new NamingPolicy();
 		am = new HashMap<String, ValueAccessMethods<?>>();
+		this.timeDomainCatalog = timeDomainCatalog;
 	}
 	
+	@Override
+	public TimeDomainCatalog getTimeDomainCatalog() {
+		return timeDomainCatalog;
+	}
+
 	@Override
 	public void open() throws T2DBException {
 	}

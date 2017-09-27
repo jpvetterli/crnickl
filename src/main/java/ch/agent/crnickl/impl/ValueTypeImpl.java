@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 
 /**
  * Default implementation of {@link ValueType}.
@@ -190,10 +189,14 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 	 */
 	public static class TimeDomainScanner implements ValueScanner<TimeDomain> {
 
-		private TimeDomainCatalog catalog;
+		private final TimeDomainCatalog catalog;
 		
-		public TimeDomainScanner() {
-			catalog = TimeDomainCatalogSingleton.instance();
+		/**
+		 * Constructor 
+		 * @param catalog the time domain catalog to use
+		 */
+		public TimeDomainScanner(TimeDomainCatalog catalog) {
+			this.catalog = catalog;
 		}
 
 		@Override
@@ -352,7 +355,7 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 	 * @param surrogate a surrogate
 	 * @throws T2DBException
 	 */
-	public ValueTypeImpl(String name, boolean restricted, String scannerClassOrKeyword, 
+	public ValueTypeImpl(String name, boolean restricted, String scannerClassOrKeyword,
 			Map<String, String> valuesAndDescriptions, Surrogate surrogate) throws T2DBException {
 		super(surrogate);
 		this.name = name;
@@ -423,7 +426,7 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 			sc = scanner = (ValueScanner<T>) new TextScanner();
 			break;
 		case TIMEDOMAIN:
-			sc = scanner = (ValueScanner<T>) new TimeDomainScanner();
+			sc = scanner = (ValueScanner<T>) new TimeDomainScanner(getSurrogate().getDatabase().getTimeDomainCatalog());
 			break;
 		case TYPE:
 			sc = scanner = (ValueScanner<T>) new TypeScanner(getSurrogate().getDatabase());

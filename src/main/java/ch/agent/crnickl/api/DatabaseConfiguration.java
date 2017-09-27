@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,14 @@ import java.util.Map;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.t2.time.DefaultTimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
  * A DatabaseConfiguration is a group of parameters defining a {@link Database}.
- * Two parameters are essential: the name of the database and the class of the database.
- * All other parameters are arbitrary key-value pairs.
+ * Three parameters are essential: the name and class of the database and the
+ * class of the time domain catalog. All other parameters are arbitrary
+ * key-value pairs.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -34,25 +37,38 @@ public class DatabaseConfiguration {
 	
 	private String databaseName;
 	private Class<? extends Database> databaseClass;
+	private TimeDomainCatalog timeDomainCatalog;
 	private Map<String, String> parameters;
 
 	/**
-	 * Construct a database configuration. If there is a problem with the
-	 * database class, an exception is thrown.
+	 * Construct a database configuration. If there is a problem with the database
+	 * class, an exception is thrown. If the name of the time domain catalog class
+	 * is null or empty, a default will be used.
 	 * 
 	 * @param databaseName
 	 *            the name of the database
 	 * @param databaseClassName
-	 *            the name of a subclass of {@link Database}
+	 *            the name of a class implementing {@link Database}
+	 * @param timeDomainCatalogClassName
+	 *            the name of a class implementing {@link TimeDomainCatalog} or null or empty
 	 * @throws T2DBException
 	 */
 	@SuppressWarnings("unchecked")
-	public DatabaseConfiguration(String databaseName, String databaseClassName) throws T2DBException {
+	public DatabaseConfiguration(String databaseName, String databaseClassName, String timeDomainCatalogClassName) throws T2DBException {
 		this.databaseName = databaseName;
 		try {
 			databaseClass = (Class<? extends Database>) Class.forName(databaseClassName);
 		} catch (Exception e) {
 			throw T2DBMsg.exception(e, D.D00104, databaseName);
+		}
+		if (timeDomainCatalogClassName == null || timeDomainCatalogClassName.length() == 0)
+			timeDomainCatalog = new DefaultTimeDomainCatalog();
+		else {
+			try {
+				timeDomainCatalog = (TimeDomainCatalog) Class.forName(timeDomainCatalogClassName).newInstance();
+			} catch (Exception e) {
+				throw T2DBMsg.exception(e, D.D00106, timeDomainCatalogClassName);
+			}
 		}
 		parameters = new LinkedHashMap<String, String>(); // keeps entry order
 	}
@@ -83,6 +99,15 @@ public class DatabaseConfiguration {
 	 */
 	public Class<? extends Database> getDatabaseClass() {
 		return databaseClass;
+	}
+	
+	/**
+	 * Return the time domain catalog.
+	 * 
+	 * @return a time domain catalog
+	 */
+	public TimeDomainCatalog getTimeDomainCatalog() {
+		return timeDomainCatalog;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import ch.agent.core.KeyedException;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.t2.time.DefaultTimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
  * A DatabaseManager sets up a {@link Database} using parameters specified in
@@ -46,6 +48,7 @@ public class SimpleDatabaseManager {
 	private Database database;
 	private String dbName;
 	private String dbClass;
+	private String timeDomainCatalogClass;
 	private Map<String, String> parameters;
 	
 	private Set<String> duplicateFileDetector;
@@ -54,21 +57,26 @@ public class SimpleDatabaseManager {
 	private String fileKey;
 	private String dbNameKey;
 	private String dbClassKey;
+	private String timeDomainCatalogClassKey;
 
 	/**
 	 * Construct a database manager with a name, a class, and a map of
-	 * configuration parameters.
+	 * configuration parameters. If the name of the time domain catalog class
+	 * is null or empty, a default will be used.
 	 * 
 	 * @param dbName
 	 *            the name of the database
 	 * @param dbClass
 	 *            the name of a {@link Database} class
+	 * @param tdcClass
+	 *            the name of a {@link TimeDomainCatalog} class or null or empty
 	 * @param parameters
 	 *            a map of key-value pairs
 	 */
-	public SimpleDatabaseManager(String dbName, String dbClass, Map<String, String> parameters) {
+	public SimpleDatabaseManager(String dbName, String dbClass, String tdcClass, Map<String, String> parameters) {
 		this.dbName = dbName;
 		this.dbClass = dbClass;
+		this.timeDomainCatalogClass = tdcClass;
 		this.parameters = parameters;
 	}
 
@@ -105,15 +113,17 @@ public class SimpleDatabaseManager {
 	 *            the key for the database name
 	 * @param dbClassKey
 	 *            the key for the name of the {@link Database} class
+	 * @param tdcClassKey
+	 *            the key for the name of the {@link TimeDomainCatalog} class
 	 * @param fileKey
 	 *            a key naming a file
 	 * @param parameterString
 	 *            a parameter string
 	 * @throws T2DBException
 	 */
-	public SimpleDatabaseManager(String listSeparator, String kvSeparator, String dbNameKey, String dbClassKey, String fileKey, String parameterString) throws T2DBException {
+	public SimpleDatabaseManager(String listSeparator, String kvSeparator, String dbNameKey, String dbClassKey, String tdcClassKey, String fileKey, String parameterString) throws T2DBException {
 		try {
-			if (listSeparator == null || kvSeparator == null || fileKey == null || dbNameKey == null || dbClassKey == null || parameterString == null)
+			if (listSeparator == null || kvSeparator == null || fileKey == null || dbNameKey == null || dbClassKey == null || tdcClassKey == null || parameterString == null)
 				throw new IllegalArgumentException("no null argument allowed");
 			
 			this.listSep = Pattern.compile(listSeparator);
@@ -121,14 +131,17 @@ public class SimpleDatabaseManager {
 			this.fileKey = fileKey;
 			this.dbNameKey = dbNameKey;
 			this.dbClassKey = dbClassKey;
+			this.timeDomainCatalogClassKey = tdcClassKey;
 			
 			parameters = new LinkedHashMap<String, String>();
 			initialize(parameterString);
 			
-			if (this.dbName == null)
+			if (dbName == null)
 				throw T2DBMsg.exception(D.D00113);
-			if (this.dbClass == null)
+			if (dbClass == null)
 				throw T2DBMsg.exception(D.D00114);
+			if (timeDomainCatalogClass == null || timeDomainCatalogClass.length() == 0)
+				timeDomainCatalogClass = DefaultTimeDomainCatalog.class.getName();
 		} catch (Exception e) {
 			throw T2DBMsg.exception(e, D.D00112, parameterString, listSeparator, kvSeparator);
 		}
@@ -144,7 +157,7 @@ public class SimpleDatabaseManager {
 	 *            a parameter string
 	 */
 	public SimpleDatabaseManager(String parameterString) throws T2DBException {
-		this("\\s*,\\s*", "\\s*=\\s*", "db.name", "db.class", "file",
+		this("\\s*,\\s*", "\\s*=\\s*", "db.name", "db.class", "timedomaincatalog.class", "file",
 				parameterString);
 	}
 	
@@ -307,13 +320,15 @@ public class SimpleDatabaseManager {
 			dbName = value;
 		else if (key.equals(dbClassKey))
 			dbClass = value;
+		else if (key.equals(timeDomainCatalogClassKey))
+			timeDomainCatalogClass = value;
 		else
 			parameters.put(key, value);
 	}
 
 	private void setUp() throws KeyedException {
 		DatabaseFactory dbf = DatabaseFactory.getInstance();
-		DatabaseConfiguration config = new DatabaseConfiguration(dbName, dbClass);
+		DatabaseConfiguration config = new DatabaseConfiguration(dbName, dbClass, timeDomainCatalogClass);
 		for (Map.Entry<String, String> e : parameters.entrySet()) {
 			config.setParameter(e.getKey(), e.getValue());
 		}

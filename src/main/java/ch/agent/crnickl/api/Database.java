@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.ValueType.StandardValueType;
+import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
  * Database is the hub of CrNiCKL (pronounced <q>chronicle</q>). 
@@ -113,6 +114,14 @@ public interface Database {
 	 * @throws T2DBException
 	 */
 	void rollback() throws T2DBException;
+	
+	/**
+	 * Return the time domain catalog. The catalog provides access to all time
+	 * domains configured in the application.
+	 * 
+	 * @return a time domain catalog
+	 */
+	TimeDomainCatalog getTimeDomainCatalog();
 	
 	/**
 	 * Return the naming policy of the database.
