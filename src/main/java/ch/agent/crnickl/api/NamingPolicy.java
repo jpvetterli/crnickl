@@ -60,9 +60,7 @@ public class NamingPolicy {
 	 */
 	public static final String LIST_SEPARATOR = ", ";
 	
-	private static final String invalidCharPattern = "[^A-Za-z0-9_\\-]";
-	
-	private Matcher invalidCharMatcher;
+	private static final Pattern invalidCharPattern = Pattern.compile("[^A-Za-z0-9_\\-]");
 
 	/**
 	 * Construct a naming policy.
@@ -116,9 +114,7 @@ public class NamingPolicy {
 	public String checkSimpleName(String name, boolean canModify) throws T2DBException {
 		if (name == null || name.length() == 0 || name.length() > NAME_MAX_LENGTH)
 			throw T2DBMsg.exception(D.D01103, name, NAME_MAX_LENGTH);
-		if (invalidCharMatcher == null)
-			invalidCharMatcher = Pattern.compile(invalidCharPattern).matcher("");
-		invalidCharMatcher.reset(name);
+		Matcher invalidCharMatcher = invalidCharPattern.matcher(name);
 		if(invalidCharMatcher.find()) {
 			if (canModify)
 				name = invalidCharMatcher.replaceAll("_");

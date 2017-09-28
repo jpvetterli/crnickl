@@ -151,10 +151,9 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 	 */
 	public static class NameScanner implements ValueScanner<String> {
 
-		private Matcher validNameMatcher;
+		private final static Pattern validNamePattern = Pattern.compile(NAME_PATTERN);
 		
 		public NameScanner() {
-			validNameMatcher = Pattern.compile(NAME_PATTERN).matcher("");
 		}
 
 		@Override
@@ -166,7 +165,7 @@ public class ValueTypeImpl<T> extends DBObjectImpl implements ValueType<T> {
 		public void check(String value) throws T2DBException {
 			if (value == null || value.length() == 0	|| value.length() > MAX_NAME_LENGTH)
 				throw T2DBMsg.exception(D.D10105, value, 0, MAX_NAME_LENGTH);
-			validNameMatcher.reset(value);
+			Matcher validNameMatcher = validNamePattern.matcher(value);
 			if (!validNameMatcher.matches())
 				throw T2DBMsg.exception(D.D10104, value, NAME_PATTERN);
 		}
