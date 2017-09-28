@@ -30,8 +30,8 @@ import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeseries.Observation;
+import ch.agent.t2.timeseries.SparseTimeSeries;
 import ch.agent.t2.timeseries.TimeAddressable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
  * Default implementation of {@link UpdatableSeries}.
@@ -85,7 +85,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 		if (reqRange != null)
 			reqRange.getTimeDomain().requireEquality(getTimeDomain());
 		/* Use a sparse array because it works even when there are large gaps: */
-		TimeAddressable<T> result = TimeSeriesFactory.make(getTimeDomain(),	getValueType().getType(), true);
+		TimeAddressable<T> result = new SparseTimeSeries<T>(getValueType().getType(), getTimeDomain());
 		if (!this.getSurrogate().inConstruction())
 			getDatabase().getValues(this, reqRange, result);
 		if (range != null)
@@ -227,7 +227,7 @@ public class UpdatableSeriesImpl<T> extends SeriesImpl<T> implements UpdatableSe
 				updates.remove(t);
 		} else {
 			if (updates == null) {
-				updates = TimeSeriesFactory.make(getTimeDomain(), (Class<T>) getValueType().getType(), true);
+				updates = new SparseTimeSeries<T>(getValueType().getType(), getTimeDomain());
 				updates.put(t, value);
 			} else
 				updates.put(t, value);

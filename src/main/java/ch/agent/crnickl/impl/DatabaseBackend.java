@@ -78,12 +78,6 @@ public interface DatabaseBackend extends Database, PermissionChecker {
 	public static final int MAX_MAGIC_NR = 9;
 
 	/** 
-	 * The name of the external parameter specifying the maximum gap for time series.
-	 * If specified, the value is set with <code>TimeSeriesFactory.setMaxGap()</code>.
-	 * When not specified, a built-in value is used.
-	 */
-	public static final String DB_PARAM_Int_MAX_GAP = "timeSeriesMaxGap";
-	/** 
 	 * The name of the external parameter specifying the cache size. The actual cache size is often larger,
 	 * because after taking the load factor into account, the actual size must be a power of 2.
 	 * For example, a cache size of 96 with a load factor of 0.75, corresponds to 128, a power of 2;

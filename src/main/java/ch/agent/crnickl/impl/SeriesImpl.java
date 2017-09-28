@@ -35,9 +35,9 @@ import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
+import ch.agent.t2.timeseries.AbstractTimeSeries;
 import ch.agent.t2.timeseries.Observation;
 import ch.agent.t2.timeseries.TimeAddressable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
  * Default implementation of {@link Series}.
@@ -198,7 +198,7 @@ public class SeriesImpl<T> extends DBObjectImpl implements Series<T> {
 			range.getTimeDomain().requireEquality(getTimeDomain());
 		if (forceSparse == false)
 			forceSparse = isSparse();
-		TimeAddressable<T> ts = TimeSeriesFactory.make(getTimeDomain(), getValueType().getType(), forceSparse);
+		TimeAddressable<T> ts = AbstractTimeSeries.make(getValueType().getType(), getTimeDomain(), forceSparse);
 		if (!this.getSurrogate().inConstruction())
 			getDatabase().getValues(this, range, ts);
 		return ts;

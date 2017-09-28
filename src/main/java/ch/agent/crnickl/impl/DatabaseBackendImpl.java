@@ -52,7 +52,6 @@ import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeseries.Observation;
 import ch.agent.t2.timeseries.TimeAddressable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
  * Default implementation of {@link DatabaseBackend}.
@@ -206,20 +205,10 @@ public abstract class DatabaseBackendImpl implements DatabaseBackend {
 	
 	@Override
 	public void configure(DatabaseConfiguration configuration) throws T2DBException {
-		String parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_MAX_GAP, false);
-		int maxGap = -1;
-		try {
-			if (parameter != null)
-				maxGap = new Integer(parameter);
-		} catch (Exception e) {
-			throw T2DBMsg.exception(e, D.D00108, DatabaseBackend.DB_PARAM_Int_MAX_GAP, parameter);
-		}
-		if (maxGap > -1)
-			TimeSeriesFactory.getInstance().setMaxGap(maxGap);
 		
 		int cacheSize = 0;
 		float cacheLoadFactor = 0f;
-		parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_CACHE_SIZE, false);
+		String parameter = configuration.getParameter(DatabaseBackend.DB_PARAM_Int_CACHE_SIZE, false);
 		try {
 			cacheSize = parameter == null ? DB_PARAM_Int_CACHE_SIZE_DEFAULT : new Integer(parameter);
 		} catch (Exception e) {
