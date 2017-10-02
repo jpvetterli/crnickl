@@ -37,7 +37,7 @@ import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.api.ValueScanner;
 import ch.agent.crnickl.api.ValueType;
-import ch.agent.t2.time.DateTime;
+import ch.agent.t2.applied.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;

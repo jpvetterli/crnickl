@@ -22,7 +22,7 @@ import java.util.Map;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.D;
-import ch.agent.t2.time.DefaultTimeDomainCatalog;
+import ch.agent.t2.applied.DefaultTimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
