@@ -1,7 +1,7 @@
 CrNiCKL RELEASE NOTES
 =====================
 
-	Copyright 2012-2013 Hauser Olsson GmbH.
+	Copyright 2012-2017 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -26,6 +26,53 @@ modified in such a way that clients using it need to be recoded or even
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
 number is incremented.
+
+*************************************************************
+
+<a name="v2_0_0">2017-10-05/jpv</a>
+
+Version 2.0.0 &mdash; Upgrade to t2 2.0.0
+-----------------------------------------
+
+The software has been slightly modified to take advantage
+of the new version of the Time2 Library, t2 2.0.0.
+
+The essential modification is that a new configuration variable 
+`timedomaincatalog` can be set to name a class providing a
+non-default time domain catalog. The variable is read by 
+`DatabaseConfiguration` and the catalog is injected into the 
+`Database` constructor by `DatabaseFactory`.
+
+The release consists of three JARs:
+
+- `crnickl-2.0.0.jar` (binaries)
+- `crnickl-2.0.0-javadoc.jar`
+- `crnickl-2.0.0-sources.jar`
+
+There is also a new version of the __JDBC Implementation of CrNiCKL__:
+
+- `crnickl-jdbc-2.0.0.jar` (binaries)
+- `crnickl-jdbc-2.0.0-javadoc.jar`
+- `crnickl-jdbc-2.0.0-sources.jar`
+
+There is also a new version of the __MongoDB Implementation of CrNiCKL__:
+
+- `crnickl-mongodb-2.0.0.jar` (binaries)
+- `crnickl-mongodb-2.0.0-javadoc.jar`
+- `crnickl-mongodb-2.0.0-sources.jar`
+
+The following changes have been made to the API:
+
+1. `Database` has a new method `getTimeDomainCatalog`.
+
+1. Some constructors of `SimpleDatabaseManager` have a new parameter giving 
+the name of a class providing the time domain catalog. 
+
+1. The constructor of `DatabaseConfiguration` has a new parameter giving
+the name of a class providing the time domain catalog. The class has also
+a new method `getTimeDomainCatalog`.
+
+The release also includes a few non-API changes and fixes.
 
 *************************************************************
 

@@ -1,6 +1,6 @@
 <h1>CrNiCKL RELEASE NOTES</h1>
 
-<pre><code>Copyright 2012-2013 Hauser Olsson GmbH.
+<pre><code>Copyright 2012-2017 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,58 @@ modified in such a way that clients using it need to be recoded or even
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
 number is incremented.</p>
+
+<hr />
+
+<p><a name="v2_0_0">2017-10-05/jpv</a></p>
+
+<h2>Version 2.0.0 &mdash; Upgrade to t2 2.0.0</h2>
+
+<p>The software has been slightly modified to take advantage
+of the new version of the Time2 Library, t2 2.0.0.</p>
+
+<p>The essential modification is that a new configuration variable 
+<code>timedomaincatalog</code> can be set to name a class providing a
+non-default time domain catalog. The variable is read by 
+<code>DatabaseConfiguration</code> and the catalog is injected into the 
+<code>Database</code> constructor by <code>DatabaseFactory</code>.</p>
+
+<p>The release consists of three JARs:</p>
+
+<ul>
+<li><code>crnickl-2.0.0.jar</code> (binaries)</li>
+<li><code>crnickl-2.0.0-javadoc.jar</code></li>
+<li><code>crnickl-2.0.0-sources.jar</code></li>
+</ul>
+
+<p>There is also a new version of the <strong>JDBC Implementation of CrNiCKL</strong>:</p>
+
+<ul>
+<li><code>crnickl-jdbc-2.0.0.jar</code> (binaries)</li>
+<li><code>crnickl-jdbc-2.0.0-javadoc.jar</code></li>
+<li><code>crnickl-jdbc-2.0.0-sources.jar</code></li>
+</ul>
+
+<p>There is also a new version of the <strong>MongoDB Implementation of CrNiCKL</strong>:</p>
+
+<ul>
+<li><code>crnickl-mongodb-2.0.0.jar</code> (binaries)</li>
+<li><code>crnickl-mongodb-2.0.0-javadoc.jar</code></li>
+<li><code>crnickl-mongodb-2.0.0-sources.jar</code></li>
+</ul>
+
+<p>The following changes have been made to the API:</p>
+
+<ol>
+<li><p><code>Database</code> has a new method <code>getTimeDomainCatalog</code>.</p></li>
+<li><p>Some constructors of <code>SimpleDatabaseManager</code> have a new parameter giving 
+the name of a class providing the time domain catalog. </p></li>
+<li><p>The constructor of <code>DatabaseConfiguration</code> has a new parameter giving
+the name of a class providing the time domain catalog. The class has also
+a new method <code>getTimeDomainCatalog</code>.</p></li>
+</ol>
+
+<p>The release also includes a few non-API changes and fixes.</p>
 
 <hr />
 

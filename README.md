@@ -82,15 +82,14 @@ database driver chosen for an application. Drivers are available from
 Browsing the source code
 ------------------------
 
-The source is available on GitHub at 
-<http://github.com/jpvetterli/crnickl.git>.
+The source is available on [GitHub](http://github.com/jpvetterli/crnickl.git).
 
 Finding more information
 ------------------------
 
-More information on CrNiCKL is available at 
-<http://agent.ch/timeseries/crnickl/>.
-This README was updated on 2013-04-30 (jpv).
+More information on CrNiCKL is available at the [project web site](http://agent.ch/timeseries/crnickl/).
+
+<small>Updated: 2017-10-04/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
